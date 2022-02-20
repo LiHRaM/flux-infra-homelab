@@ -5,6 +5,7 @@ namespace: jellyfin-saga
 resources:
   - namespace.yaml
   - ../../base/jellyfin
+  - ../../base/configMaps/linuxserver
 
 patchesStrategicMerge:
   - jellyfin-patch.yaml
