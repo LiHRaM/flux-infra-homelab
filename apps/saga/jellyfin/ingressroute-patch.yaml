@@ -1,0 +1,13 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jellyfin
+spec:
+  routes:
+   - kind: Rule
+     match: Host(\`flix.media.local\`)
+     services:
+        - kind: Service
+          name: jellyfin
+          port: 80

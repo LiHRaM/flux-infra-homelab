@@ -3,29 +3,27 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jellyfin
-  namespace: default
+  labels:
+    name: jellyfin
 spec:
   selector:
     matchLabels:
-      app: jellyfin
+      task: jellyfin
   template:
     metadata:
       labels:
-        app: jellyfin
+        task: jellyfin
     spec:
       containers:
         - name: jellyfin
           image: lscr.io/linuxserver/jellyfin
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http
-              containerPort: 8096
+            - containerPort: 8096
               protocol: TCP
-            - name: client-disc
-              containerPort: 7359
+            - containerPort: 7359
               protocol: UDP
-            - name: service-disc
-              containerPort: 1900
+            - containerPort: 1900
               protocol: UDP
           env:
             - name: PUID
@@ -43,3 +41,19 @@ spec:
                 configMapKeyRef:
                   name: linuxserver-common
                   key: TZ
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin
+  namespace: app
+spec:
+  ports:
+    - name: http
+      port: 8096
+    - name: client-disc
+      port: 7359
+    - name: service-disc
+      port: 1900
+  selector:
+    task: jellyfin
