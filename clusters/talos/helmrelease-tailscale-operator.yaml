@@ -9,7 +9,7 @@ spec:
     createNamespace: true
   values:
     operatorConfig:
-      podSecurityContext:
+      securityContext:
         allowPrivilegeEscalation: false
         capabilities:
           drop:
