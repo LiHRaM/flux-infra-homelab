@@ -17,3 +17,14 @@ spec:
   targetNamespace: default
   timeout: 3m0s
   wait: true
+
+  patches:
+    - patch: |-
+        apiVersion: v1
+        kind: Service
+        metadata:
+          annotations:
+            tailscale.com/expose: "true"
+      target:
+        kind: Service
+        name: podinfo
