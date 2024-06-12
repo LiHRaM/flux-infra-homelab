@@ -9,7 +9,7 @@ spec:
     createNamespace: true
   values:
     operatorConfig:
-      securityContext:
+      podSecurityContext:
         runAsNonRoot: true
     oauth:
       clientId: kVmrWqBys211CNTRL
