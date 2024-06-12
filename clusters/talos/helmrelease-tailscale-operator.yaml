@@ -5,6 +5,8 @@ metadata:
   name: tailscale-operator
   namespace: flux-system
 spec:
+  install:
+    createNamespace: true
   chart:
     spec:
       chart: tailscale-operator
@@ -14,4 +16,4 @@ spec:
         name: tailscale
   interval: 5m0s
   releaseName: tailscale-operator
-  targetNamespace: default
+  targetNamespace: tailscale
