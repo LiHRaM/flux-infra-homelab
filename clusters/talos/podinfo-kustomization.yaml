@@ -17,10 +17,9 @@ spec:
   wait: true
   patches:
     - target:
-        version: v1
         kind: Service
         name: podinfo
       patch: |-
-        - op: add
-          path: /metadata/annotations/tailscale.com/expose
-          value: "true"
+        metadata:
+          annotations:
+            tailscale.com/expose: "true"
