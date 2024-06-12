@@ -22,5 +22,5 @@ spec:
         name: podinfo
       patch: |
         - op: add
-          path: /metadata/annotations/tailscale.com/expose
+          path: /spec/template/metadata/annotations/tailscale.com/expose
           value: "true"
