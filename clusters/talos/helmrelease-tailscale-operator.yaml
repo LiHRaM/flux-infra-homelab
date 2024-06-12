@@ -9,7 +9,7 @@ spec:
     createNamespace: true
   values:
     operatorConfig:
-      securityContext:
+      podSecurityContext:
         runAsNonRoot: true
         runAsUser: 1000
     oauth:
