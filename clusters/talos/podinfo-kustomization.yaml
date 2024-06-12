@@ -4,6 +4,8 @@ kind: Kustomization
 metadata:
   name: podinfo
   namespace: flux-system
+  annotations:
+    tailscale.com/expose: "true"
 spec:
   interval: 30m0s
   path: ./kustomize
@@ -15,11 +17,3 @@ spec:
   targetNamespace: default
   timeout: 3m0s
   wait: true
-  patches:
-    - target:
-        kind: Service
-        name: podinfo
-      patch: |-
-        metadata:
-          annotations:
-            tailscale.com/expose: "true"
