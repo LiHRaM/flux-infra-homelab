@@ -20,7 +20,7 @@ spec:
         version: v1
         kind: Service
         name: podinfo
-      patch: |
+      patch: |-
         - op: add
-          path: /spec/template/metadata/annotations/tailscale.com/expose
+          path: /metadata/annotations/tailscale.com/expose
           value: "true"
