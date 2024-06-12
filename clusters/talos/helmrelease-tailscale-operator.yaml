@@ -8,6 +8,15 @@ spec:
   install:
     createNamespace: true
   values:
+    operatorConfig:
+      podSecurityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     oauth:
       clientId: kVmrWqBys211CNTRL
       clientSecret: tskey-client-kVmrWqBys211CNTRL-ZZwymHcaHSabQDKjRVMjSa7eTJq5SUVc
