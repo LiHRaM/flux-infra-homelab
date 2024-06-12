@@ -15,3 +15,14 @@ spec:
   targetNamespace: default
   timeout: 3m0s
   wait: true
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              version: v1
+              kind: Service
+              name: podinfo
+            patch: |
+              - op: add
+                path: /metadata/annotations/tailscale.com/expose
+                value: "true"
