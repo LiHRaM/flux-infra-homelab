@@ -9,8 +9,10 @@ spec:
     createNamespace: true
   values:
     operatorConfig:
-      podSecurityContext:
+      securityContext:
+        fsGroup: 2000
         runAsNonRoot: true
+        runAsUser: 1000
     oauth:
       clientId: kVmrWqBys211CNTRL
       clientSecret: tskey-client-kVmrWqBys211CNTRL-ZZwymHcaHSabQDKjRVMjSa7eTJq5SUVc
