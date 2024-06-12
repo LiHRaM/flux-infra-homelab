@@ -7,6 +7,10 @@ metadata:
 spec:
   install:
     createNamespace: true
+  values:
+    oauth:
+      client_id: kVmrWqBys211CNTRL
+      client_secret: tskey-client-kVmrWqBys211CNTRL-ZZwymHcaHSabQDKjRVMjSa7eTJq5SUVc
   chart:
     spec:
       chart: tailscale-operator
