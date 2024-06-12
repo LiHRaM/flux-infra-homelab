@@ -10,10 +10,7 @@ spec:
   values:
     operatorConfig:
       securityContext:
-        allowPrivilegeEscalation: false
         runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
     oauth:
       clientId: kVmrWqBys211CNTRL
       clientSecret: tskey-client-kVmrWqBys211CNTRL-ZZwymHcaHSabQDKjRVMjSa7eTJq5SUVc
