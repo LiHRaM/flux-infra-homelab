@@ -9,10 +9,15 @@ spec:
     createNamespace: true
   values:
     operatorConfig:
-      podSecurityContext:
+      securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      podSecurityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
     oauth:
       clientId: kVmrWqBys211CNTRL
       clientSecret: tskey-client-kVmrWqBys211CNTRL-ZZwymHcaHSabQDKjRVMjSa7eTJq5SUVc
