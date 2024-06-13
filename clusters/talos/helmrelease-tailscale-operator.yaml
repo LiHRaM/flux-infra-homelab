@@ -8,16 +8,6 @@ spec:
   install:
     createNamespace: true
   values:
-    operatorConfig:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-      podSecurityContext:
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
     oauth:
       clientId: kVmrWqBys211CNTRL
       clientSecret: tskey-client-kVmrWqBys211CNTRL-ZZwymHcaHSabQDKjRVMjSa7eTJq5SUVc
@@ -31,3 +21,18 @@ spec:
   interval: 5m0s
   releaseName: tailscale-operator
   targetNamespace: tailscale
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: tailscale
+                labels:
+                  pod-security.kubernetes.io/enforce: "privileged"
+            target:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: tailscale
