@@ -43,5 +43,4 @@ spec:
       target:
         apiVersion: v1
         kind: Service
-        metadata:
-          name: capacitor
+        name: capacitor
