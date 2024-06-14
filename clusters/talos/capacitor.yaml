@@ -39,7 +39,7 @@ spec:
             - name: tailscale
               port: 80
               protocol: TCP
-              targetPort: http
+              targetPort: https
       target:
         kind: Service
         name: capacitor
