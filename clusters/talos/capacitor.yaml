@@ -34,12 +34,6 @@ spec:
           name: required-but-not-used
           annotations:
             tailscale.com/expose: "true"
-        spec:
-          ports:
-            - name: tailscale
-              port: 443
-              protocol: TCP
-              targetPort: http
       target:
         kind: Service
         name: capacitor
