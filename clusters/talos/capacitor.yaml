@@ -28,18 +28,18 @@ spec:
     name: capacitor
   patches:
     - patch: |-
-      apiVersion: v1
-      kind: Service
-      metadata:
-        name: required-but-not-used
-        annotations:
-          tailscale.com/expose: "true"
-      spec:
-        ports:
-          - name: http
-            port: 80
-            protocol: TCP
-            targetPort: http
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: required-but-not-used
+          annotations:
+            tailscale.com/expose: "true"
+        spec:
+          ports:
+            - name: http
+              port: 80
+              protocol: TCP
+              targetPort: http
       target:
         apiVersion: v1
         kind: Service
