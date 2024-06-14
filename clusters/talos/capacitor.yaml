@@ -36,7 +36,7 @@ spec:
             tailscale.com/expose: "true"
         spec:
           ports:
-            - name: http
+            - name: tailscale
               port: 80
               protocol: TCP
               targetPort: http
