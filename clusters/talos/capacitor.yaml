@@ -41,6 +41,5 @@ spec:
               protocol: TCP
               targetPort: http
       target:
-        apiVersion: v1
         kind: Service
         name: capacitor
