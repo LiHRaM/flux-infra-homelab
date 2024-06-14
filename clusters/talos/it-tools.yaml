@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: it-tools
+  name: it-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: it-tools
+  template:
+    metadata:
+      labels:
+        app: it-tools
+    spec:
+      containers:
+      - image: corentinth/it-tools:latest
+        name: it-tools
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: it-tools
+  annotations:
+    tailscale.com/expose: "true"
+spec:
+  selector:
+    app: it-tools
+  ports:
+  - port: 80
+    targetPort: 8080
