@@ -31,13 +31,13 @@ spec:
             - mountPath: /data
               name: media
               readOnly: True
-            - mountPath: /config
-              name: config
+            # - mountPath: /config
+            #   name: config
       restartPolicy: Always
       volumes:
         - name: media
           persistentVolumeClaim:
             claimName: media
-        - name: config
-          persistentVolumeClaim:
-            claimName: jellyfin-config-ms
+        # - name: config
+        #   persistentVolumeClaim:
+        #     claimName: jellyfin-config-ms
