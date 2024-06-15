@@ -5,6 +5,16 @@ metadata:
   name: openebs
   namespace: flux-system
 spec:
+  values:
+    engines:
+      local:
+        lvm:
+          enabled: false
+        zfs:
+          enabled: false
+      replicated:
+        mayastor:
+          enabled: true
   chart:
     spec:
       chart: openebs
