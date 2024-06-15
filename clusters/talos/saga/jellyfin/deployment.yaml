@@ -40,4 +40,4 @@ spec:
             claimName: media
         - name: config
           persistentVolumeClaim:
-            claimName: csi-lvmpv
+            claimName: jellyfin-config-ms
