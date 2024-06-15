@@ -9,6 +9,8 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=4.1
   nfs:
     readOnly: false
     path: /Public/media/
