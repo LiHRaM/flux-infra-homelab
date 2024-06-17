@@ -1,9 +1,10 @@
----
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: media
 spec:
+  capacity:
+    storage: 3.97Ti
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
@@ -12,15 +13,5 @@ spec:
     - nfsvers=4.1
   nfs:
     readOnly: false
-    path: /Media
+    path: /Media/
     server: 10.240.1.43
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: media
-  namespace: saga
-spec:
-  volumeName: media
-  accessModes:
-    - ReadWriteMany

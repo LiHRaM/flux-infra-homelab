@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: saga
+spec:
+  requests:
+    storage: 3.97Ti
+  volumeName: media
+  accessModes:
+    - ReadWriteMany
