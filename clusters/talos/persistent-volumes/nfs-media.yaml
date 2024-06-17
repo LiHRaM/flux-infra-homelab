@@ -4,12 +4,11 @@ kind: PersistentVolume
 metadata:
   name: media
 spec:
-  capacity:
-    storage: 4Ti
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   mountOptions:
+    - hard
     - nfsvers=4.1
   nfs:
     readOnly: false
@@ -25,6 +24,3 @@ spec:
   volumeName: media
   accessModes:
     - ReadWriteMany
-  resources:
-    requests:
-      storage: 4Ti
