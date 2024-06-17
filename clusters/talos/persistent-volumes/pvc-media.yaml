@@ -4,7 +4,7 @@ metadata:
   name: media
   namespace: saga
 spec:
-  requests:
+  resources:
     storage: 3.97Ti
   volumeName: media
   accessModes:
