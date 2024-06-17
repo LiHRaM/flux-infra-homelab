@@ -5,7 +5,8 @@ metadata:
   namespace: saga
 spec:
   resources:
-    storage: 3.97Ti
+    requests:
+      storage: 3.97Ti
   volumeName: media
   accessModes:
     - ReadWriteMany
