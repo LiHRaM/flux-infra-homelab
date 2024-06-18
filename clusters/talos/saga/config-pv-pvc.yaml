@@ -10,13 +10,11 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   iscsi:
+
     lun: 0
     iqn: iqn.2004-04.com.qnap:ts-233:iscsi.homelab.7069f3
     targetPortal: 10.240.1.43
     fsType: ext4
-    secretRef:
-      name: iscsi-chap
-      namespace: flux-system
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
