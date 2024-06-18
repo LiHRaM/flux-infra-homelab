@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: linuxserver-common
+  namespace: flux-system
 data:
   PUID: "1000"
   PGID: "1000"

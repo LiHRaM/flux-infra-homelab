@@ -1,5 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: saga
 resources:
 - namespace.yaml
 - config-pv-pvc.yaml
+- ../../../apps/base/jellyfin
+- ../../../apps/configMaps/linuxserver
+
+patches:
+- path: deployment-patch.yaml
