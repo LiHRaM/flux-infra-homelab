@@ -61,4 +61,4 @@ spec:
     - name: service-disc
       port: 1900
   selector:
-    task: jellyfin
+    app: jellyfin
