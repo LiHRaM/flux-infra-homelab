@@ -20,20 +20,19 @@ spec:
       - image: corentinth/it-tools:latest
         name: it-tools
         resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
           limits:
             cpu: 100m
             memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: it-tools
-  namespace: default
-  annotations:
-    tailscale.com/expose: "true"
-spec:
-  selector:
-    app: it-tools
-  ports:
-  - port: 80
-    targetPort: 80
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 10001
+          runAsGroup: 10001
+          capabilities:
+            drop:
+              - ALL
+          
