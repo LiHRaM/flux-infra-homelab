@@ -55,7 +55,8 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 8096
+      port: 80
+      targetPort: 8096
     - name: client-disc
       port: 7359
     - name: service-disc

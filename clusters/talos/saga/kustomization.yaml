@@ -4,6 +4,7 @@ namespace: saga
 resources:
 - namespace.yaml
 - config-pv-pvc.yaml
+- jellyfin-ingress.yaml
 - ../../../apps/base/jellyfin
 - ../../../apps/configMaps/linuxserver
 
