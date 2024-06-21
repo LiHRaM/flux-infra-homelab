@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ntfy-deployment
+  labels:
+    app: ntfy-deployment
+spec:
+  revisionHistoryLimit: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ntfy-pod
+  template:
+    metadata:
+      labels:
+        app: ntfy-pod
+    spec:
+      containers:
+        - name: ntfy 
+          image: binwiederhier/ntfy:v1.28.0
+          args: ["serve"]
+          env:
+            - name: PUID
+              valueFrom:
+                configMapKeyRef:
+                  name: linuxserver-common
+                  key: PUID
+            - name: PGID
+              valueFrom:
+                configMapKeyRef:
+                  name: linuxserver-common
+                  key: PGID
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: linuxserver-common
+                  key: TZ
+          ports: 
+            - containerPort: 80
+              name: http-ntfy
+          resources:
+            limits:
+              memory: 300Mi
+              cpu:  200m
+            requests:
+                  cpu: 150m
+                  memory: 150Mi
+          volumeMounts:
+              - mountPath: /etc/ntfy/server.yml
+                subPath: server.yaml
+                name: config-volume
+              - mountPath: /var/cache/ntfy
+                name: cache-volume
+      volumes:
+        - name: config-volume
+          configMap:
+            name: server-config
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: ntfy-pvc
