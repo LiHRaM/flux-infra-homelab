@@ -46,20 +46,3 @@ spec:
                 configMapKeyRef:
                   name: linuxserver-common
                   key: TZ
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: jellyfin
-  namespace: saga
-spec:
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8096
-    - name: client-disc
-      port: 7359
-    - name: service-disc
-      port: 1900
-  selector:
-    app: jellyfin
