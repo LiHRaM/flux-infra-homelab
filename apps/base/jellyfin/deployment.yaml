@@ -6,6 +6,9 @@ metadata:
   labels:
     app: jellyfin
 spec:
+  strategy:
+    type: Recreate
+    rollingUpdate: null
   replicas: 1
   selector:
     matchLabels:
@@ -26,23 +29,19 @@ spec:
           ports:
             - containerPort: 8096
               protocol: TCP
+              name: http
             - containerPort: 7359
               protocol: UDP
             - containerPort: 1900
               protocol: UDP
-          env:
-            - name: PUID
-              valueFrom:
-                configMapKeyRef:
-                  name: linuxserver-common
-                  key: PUID
-            - name: PGID
-              valueFrom:
-                configMapKeyRef:
-                  name: linuxserver-common
-                  key: PGID
-            - name: TZ
-              valueFrom:
-                configMapKeyRef:
-                  name: linuxserver-common
-                  key: TZ
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false
