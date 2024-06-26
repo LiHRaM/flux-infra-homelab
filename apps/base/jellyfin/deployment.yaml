@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: jellyfin
-          image: ghcr.io/linuxserver/jellyfin
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/linuxserver/jellyfin:latest
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: 3000m
