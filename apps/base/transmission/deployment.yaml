@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transmission
+  namespace: transmission
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: transmission
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: transmission
+    spec:
+      initContainers:
+        # Inspired by: https://github.com/qdm12/gluetun-wiki/pull/7#issuecomment-2190007011
+        - name: gluetun
+          image: "ghcr.io/qdm12/gluetun:latest"
+          imagePullPolicy: Always
+          restartPolicy: Always
+          ports:
+          - name: http-proxy
+            containerPort: 8888
+            protocol: TCP
+          - name: tcp-shadowsocks
+            containerPort: 8388
+            protocol: TCP
+          - name: udp-shadowsocks
+            containerPort: 8388
+            protocol: UDP
+          envFrom:
+            - secretRef:
+                name: gluetun
+                optional: false
+            - configMapRef:
+                name: linuxserver-common
+                optional: false
+          env:
+          - name: FIREWALL_DEBUG
+            value: "on"
+          - name: FIREWALL_INPUT_PORTS
+            value: "9091"
+          securityContext:
+            capabilities:
+              add:
+              - NET_ADMIN
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: linuxserver-common
+            optional: false
+        - configMapRef:
+            name: transmission-config
+            optional: false
+        image: lscr.io/linuxserver/transmission:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          tcpSocket:
+            port: 9091
+          timeoutSeconds: 2
+        name: transmission
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 2
+          tcpSocket:
+            port: 9091
+          timeoutSeconds: 2
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2000Mi
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: data
+        nfs:
+          path: /media/Transmission
+          server: 10.240.1.43
