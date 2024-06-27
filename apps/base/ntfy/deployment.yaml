@@ -19,23 +19,11 @@ spec:
         - name: ntfy 
           image: binwiederhier/ntfy:v1.28.0
           args: ["serve"]
-          env:
-            - name: PUID
-              valueFrom:
-                configMapKeyRef:
-                  name: linuxserver-common
-                  key: PUID
-            - name: PGID
-              valueFrom:
-                configMapKeyRef:
-                  name: linuxserver-common
-                  key: PGID
-            - name: TZ
-              valueFrom:
-                configMapKeyRef:
-                  name: linuxserver-common
-                  key: TZ
-          ports: 
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false
+          ports:
             - containerPort: 80
               name: http-ntfy
           resources:
