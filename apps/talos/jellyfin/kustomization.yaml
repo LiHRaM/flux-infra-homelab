@@ -5,8 +5,9 @@ resources:
 - namespace.yaml
 - config-pv-pvc.yaml
 - jellyfin-ingress.yaml
-- ../../../apps/base/jellyfin
-- ../../../apps/configMaps/linuxserver
+- pvc-media.yaml
+- ../../base/jellyfin
+- ../../configMaps/linuxserver
 
 patches:
 - path: deployment-patch.yaml
