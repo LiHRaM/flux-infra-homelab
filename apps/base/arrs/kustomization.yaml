@@ -5,3 +5,5 @@ resources:
 - prowlarr-service.yaml
 - radarr-deployment.yaml
 - radarr-service.yaml
+- sonarr-deployment.yaml
+- sonarr-service.yaml
