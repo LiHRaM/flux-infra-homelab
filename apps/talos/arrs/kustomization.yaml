@@ -7,5 +7,6 @@ resources:
 - prowlarr-ingress.yaml
 - radarr-ingress.yaml
 - sonarr-ingress.yaml
+- readarr-ingress.yaml
 
 namespace: arrs

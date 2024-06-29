@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readarr
+  labels:
+    app: readarr
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: readarr
+  template:
+    metadata:
+      labels:
+        app: readarr
+    spec:
+      containers:
+        - name: readarr
+          image: ghcr.io/linuxserver/readarr:develop
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 200Mi
+              cpu: 250m
+          ports:
+            - containerPort: 8787
+              protocol: TCP
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false

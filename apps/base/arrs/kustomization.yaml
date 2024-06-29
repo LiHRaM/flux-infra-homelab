@@ -7,3 +7,5 @@ resources:
 - radarr-service.yaml
 - sonarr-deployment.yaml
 - sonarr-service.yaml
+- readarr-deployment.yaml
+- readarr-service.yaml
