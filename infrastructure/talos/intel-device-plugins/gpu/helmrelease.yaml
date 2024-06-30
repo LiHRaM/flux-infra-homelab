@@ -2,12 +2,12 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: intel-device-plugins
+  name: intel-device-plugins-gpu
   namespace: flux-system
 spec:
   chart:
     spec:
-      chart: intel-device-plugins-operator
+      chart: intel-device-plugins-gpu
       reconcileStrategy: ChartVersion
       sourceRef:
         kind: HelmRepository
@@ -15,7 +15,14 @@ spec:
         namespace: flux-system
       version: 0.30.0
   interval: 1m0s
-  releaseName: intel-device-plugins
+  releaseName: intel-device-plugins-gpu
   targetNamespace: intel-device-plugins
   driftDetection:
     mode: enabled
+  values:
+    includeCRDs: true
+    name: igpu
+    sharedDevNum: 5
+    nodeFeatureRule: false
+    nodeSelector:
+      intel.feature.node.kubernetes.io/gpu: 'true'
