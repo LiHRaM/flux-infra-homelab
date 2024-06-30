@@ -11,6 +11,9 @@ spec:
     spec:
       containers:
       - name: jellyfin
+        resources:
+          limits:
+            gpu.intel.com/i915: 1000m
         volumeMounts:
         - mountPath: /data
           name: media
