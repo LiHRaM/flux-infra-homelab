@@ -1,0 +1,23 @@
+# Source: https://blog.stonegarden.dev/articles/2024/05/intel-quick-sync-k8s/#node-feature-discovery-optional
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Node Feature Discovery
+  - https://github.com/kubernetes-sigs/node-feature-discovery/deployment/overlays/default?ref=v0.15.4
+
+  # NFD rules for Intel HW
+  - https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.29.0
+
+
+configMapGenerator:
+  - name: nfd-worker-conf
+    behavior: replace
+    files:
+      - nfd-worker.conf
+
+patches:
+  - path: namespace-patch.yaml
+
+namespace: node-feature-discovery
