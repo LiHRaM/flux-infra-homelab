@@ -23,9 +23,12 @@ spec:
           image: ghcr.io/linuxserver/jellyfin:latest
           imagePullPolicy: Always
           resources:
+            requests:
+              cpu: 200m
+              memory: 1G
             limits:
-              cpu: 3000m
-              memory: 4Gi
+              cpu: 2000m
+              memory: 4G
           ports:
             - containerPort: 8096
               protocol: TCP
