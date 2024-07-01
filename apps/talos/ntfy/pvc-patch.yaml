@@ -3,10 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: ntfy-pvc
 spec:
-  storageClassName: ""
+  storageClassName: longhorn-trusty
   resources:
     requests:
       storage: 1Gi
-  volumeName: ntfy
   accessModes:
     - ReadWriteOnce
