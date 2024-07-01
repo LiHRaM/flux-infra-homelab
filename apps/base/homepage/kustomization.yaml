@@ -4,7 +4,19 @@ resources:
 - serviceaccount.yaml
 - secret.yaml
 - clusterrole.yaml
-- configmap.yaml
 - deployment.yaml
 - service.yaml
 - ingress.yaml
+
+configMapGenerator:
+  - name: homepage
+    namespace: default
+    files:
+      - config/kubernetes.yaml
+      - config/settings.yaml
+      - config/custom.css
+      - config/custom.js
+      - config/bookmarks.yaml
+      - config/services.yaml
+      - config/widgets.yaml
+      - config/docker.yaml
