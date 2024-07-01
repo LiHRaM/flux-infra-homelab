@@ -14,16 +14,13 @@ spec:
         volumeMounts:
         - mountPath: /media
           name: media
-        # - mountPath: /config
-        #   name: sonarr-config
+        - mountPath: /config
+          name: sonarr-config
       volumes:
       - name: media
         nfs:
           path: /media/
           server: 10.240.1.43
-      # - name: sonarr-config
-      #   iscsi:
-      #     lun: 4
-      #     iqn: iqn.2004-04.com.qnap:ts-233:iscsi.homelab.7069f3
-      #     targetPortal: 10.240.1.43
-      #     fsType: ext4
+      - name: sonarr-config
+        persistentVolumeClaim:
+          claimName: sonarr-config
