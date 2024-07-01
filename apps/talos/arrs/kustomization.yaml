@@ -5,6 +5,7 @@ resources:
 - ../../configMaps/linuxserver
 - namespace.yaml
 - prowlarr-ingress.yaml
+- prowlarr-config-pvc.yaml
 - radarr-ingress.yaml
 - sonarr-ingress.yaml
 - readarr-ingress.yaml
