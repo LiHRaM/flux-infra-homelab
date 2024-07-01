@@ -1,0 +1,34 @@
+- Jess Can Touch:
+    - jellyfin:
+        href: https://jellyfin.tyrannosaurus-turtle.ts.net
+        description: "Stream media"
+        icon: jellyfin.png
+    - sonarr:
+        href: https://sonarr.tyrannosaurus-turtle.ts.net
+        description: "Manage series"
+        icon: sonarr.png
+    - radarr:
+        href: https://radarr.tyrannosaurus-turtle.ts.net
+        description: "Manage movies"
+        icon: radarr.png
+- You Probably Don't Care About This:
+    - readarr:
+        href: https://readarr.tyrannosaurus-turtle.ts.net
+        description: "Manage books"
+        icon: readarr.png
+    - bazarr:
+        href: https://bazarr.tyrannosaurus-turtle.ts.net
+        description: "Manage subtitles"
+        icon: bazarr.png
+    - prowlarr:
+        href: https://prowlarr.tyrannosaurus-turtle.ts.net
+        description: "Manage indexers"
+        icon: prowlarr.png
+    - ntfy:
+        href: https://ntfy.tyrannosaurus-turtle.ts.net
+        description: "Notifications"
+        icon: ntfy.png
+    - transmission:
+        href: https://transmission.tyrannosaurus-turtle.ts.net
+        description: "Downloads"
+        icon: transmission.png
