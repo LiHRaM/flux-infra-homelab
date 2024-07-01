@@ -22,8 +22,8 @@ spec:
           imagePullPolicy: Always
           resources:
             limits:
+              cpu: 100m
               memory: 200Mi
-              cpu: 250m
           ports:
             - containerPort: 7878
               protocol: TCP
