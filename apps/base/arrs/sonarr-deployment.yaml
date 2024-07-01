@@ -20,10 +20,6 @@ spec:
         - name: sonarr
           image: ghcr.io/linuxserver/sonarr:latest
           imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 100m
-              memory: 200Mi
           ports:
             - containerPort: 8989
               protocol: TCP

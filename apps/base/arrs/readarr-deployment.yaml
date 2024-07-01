@@ -20,10 +20,6 @@ spec:
         - name: readarr
           image: ghcr.io/linuxserver/readarr:develop
           imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 100m
-              memory: 200Mi
           ports:
             - containerPort: 8787
               protocol: TCP

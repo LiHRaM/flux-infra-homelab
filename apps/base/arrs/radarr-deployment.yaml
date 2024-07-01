@@ -20,10 +20,6 @@ spec:
         - name: radarr
           image: ghcr.io/linuxserver/radarr:latest
           imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 100m
-              memory: 200Mi
           ports:
             - containerPort: 7878
               protocol: TCP

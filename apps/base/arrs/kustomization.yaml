@@ -16,7 +16,10 @@ patches:
       version: v1
       kind: Deployment
     patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/cpu
-        value: 200m
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 200m
+            memory: 200Mi
     

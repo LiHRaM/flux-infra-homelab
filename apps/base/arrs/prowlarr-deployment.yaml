@@ -21,10 +21,6 @@ spec:
         - name: prowlarr
           image: ghcr.io/linuxserver/prowlarr:latest
           imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 100m
-              memory: 200Mi
           ports:
             - containerPort: 9696
               protocol: TCP
