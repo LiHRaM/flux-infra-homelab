@@ -2,6 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: prowlarr
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: "Media"
+    gethomepage.dev/name: Prowlarr
+    gethomepage.dev/description: "Manage indexes"
+    gethomepage.dev/icon: prowlarr.png
+    gethomepage.dev/widget.type: "prowlarr"
+    gethomepage.dev/widget.url: "https://prowlarr.tyrannosaurus-turtle.ts.net"
+    gethomepage.dev/pod-selector: ""
+    gethomepage.dev/weight: 10 # optional
 spec:
   defaultBackend:
     service:
