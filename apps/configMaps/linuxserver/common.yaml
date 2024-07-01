@@ -5,6 +5,6 @@ metadata:
   name: linuxserver-common
   namespace: flux-system
 data:
-  PUID: "1001"
-  PGID: "911"
+  PUID: "1000"
+  PGID: "1000"
   TZ: Europe/Copenhagen
