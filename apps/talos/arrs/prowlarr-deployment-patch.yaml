@@ -1,0 +1,23 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+spec:
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    spec:
+      containers:
+      - name: prowlarr
+        volumeMounts:
+        - mountPath: /config
+          name: config
+      volumes:
+      - name: config
+        iscsi:
+          lun: 2
+          iqn: iqn.2004-04.com.qnap:ts-233:iscsi.homelab.7069f3
+          targetPortal: 10.240.1.43
+          fsType: ext4
