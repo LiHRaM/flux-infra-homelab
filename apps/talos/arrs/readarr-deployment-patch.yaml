@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readarr
+spec:
+  selector:
+    matchLabels:
+      app: readarr
+  template:
+    spec:
+      containers:
+      - name: readarr
+        volumeMounts:
+        - mountPath: /media
+          name: media
+        - mountPath: /config
+          name: config
+      volumes:
+      - name: media
+        nfs:
+          path: /media/
+          server: 10.240.1.43
+      - name: config
+        iscsi:
+          lun: 5
+          iqn: iqn.2004-04.com.qnap:ts-233:iscsi.homelab.7069f3
+          targetPortal: 10.240.1.43
+          fsType: ext4
