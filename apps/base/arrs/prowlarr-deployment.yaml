@@ -29,13 +29,6 @@ spec:
             - containerPort: 9696
               protocol: TCP
               name: http
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-            failureThreshold: 3
-            initialDelaySeconds: 15
-            periodSeconds: 30
           envFrom:
             - configMapRef:
                 name: linuxserver-common
