@@ -9,3 +9,14 @@ resources:
 - sonarr-service.yaml
 - readarr-deployment.yaml
 - readarr-service.yaml
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 200m
+    
