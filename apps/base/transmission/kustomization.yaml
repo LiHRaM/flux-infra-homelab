@@ -2,9 +2,23 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - namespace.yaml
-- config.yaml
 - deployment.yaml
 - service.yaml
 - ingress.yaml
 
 namespace: transmission
+
+configMapGenerator:
+  - name: transmission-config
+    literals:
+      - "DOCKER_MODS=linuxserver/mods:transmission-env-var-settings"
+      - "TRANSMISSION_DOWNLOAD_DIR=/media/Transmission/complete"
+      - "TRANSMISSION_INCOMPLETE_DIR=/media/Transmission/incomplete"
+      - "TRANSMISSION_INCOMPLETE_DIR_ENABLED=true"
+      - "TRANSMISSION_DOWNLOAD_QUEUE_SIZE=4"
+      - "TRANSMISSION_RATIO_LIMIT=2"
+      - "TRANSMISSION_RATIO_LIMIT_ENABLED=true"
+      - "TRANSMISSION_SPEED_LIMIT_DOWN=10000"
+      - "TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED=true"
+      - "TRANSMISSION_SPEED_LIMIT_UP=1000"
+      - "TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true"
