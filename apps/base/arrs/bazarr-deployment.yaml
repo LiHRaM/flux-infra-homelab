@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+  labels:
+    app: bazarr
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    metadata:
+      labels:
+        app: bazarr
+    spec:
+      containers:
+        - name: bazarr
+          image: ghcr.io/linuxserver/bazarr:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6767
+              protocol: TCP
+              name: http
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false

@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+spec:
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    spec:
+      containers:
+      - name: bazarr
+        volumeMounts:
+        - mountPath: /media
+          name: media
+        - mountPath: /config
+          name: bazarr-config
+      volumes:
+      - name: media
+        nfs:
+          path: /media/
+          server: 10.240.1.43
+      - name: bazarr-config
+        persistentVolumeClaim:
+          claimName: bazarr-config

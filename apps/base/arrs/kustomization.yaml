@@ -9,6 +9,8 @@ resources:
 - sonarr-service.yaml
 - readarr-deployment.yaml
 - readarr-service.yaml
+- bazarr-deployment.yaml
+- bazarr-service.yaml
 
 patches:
   - target:
