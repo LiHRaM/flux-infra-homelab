@@ -81,12 +81,12 @@ spec:
             cpu: 500m
             memory: 2000Mi
         volumeMounts:
-        - mountPath: /data
-          name: data
+        - mountPath: /media/Transmission
+          name: media
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: data
+      - name: media
         nfs:
           path: /media/Transmission
           server: 10.240.1.43
