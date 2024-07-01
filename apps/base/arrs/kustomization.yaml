@@ -23,5 +23,5 @@ patches:
         value:
           limits:
             cpu: 200m
-            memory: 200Mi
+            memory: 300Mi
     
