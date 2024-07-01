@@ -13,3 +13,4 @@ namespace: arrs
 
 patches:
 - path: prowlarr-deployment-patch.yaml
+- path: radarr-deployment-patch.yaml
