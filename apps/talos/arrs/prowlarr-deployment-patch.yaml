@@ -13,9 +13,9 @@ spec:
       - name: prowlarr
         volumeMounts:
         - mountPath: /config
-          name: config
+          name: prowlarr-config
       volumes:
-      - name: config
+      - name: prowlarr-config
         iscsi:
           lun: 2
           iqn: iqn.2004-04.com.qnap:ts-233:iscsi.homelab.7069f3

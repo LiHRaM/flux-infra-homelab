@@ -15,13 +15,13 @@ spec:
         - mountPath: /media
           name: media
         - mountPath: /config
-          name: config
+          name: radarr-config
       volumes:
       - name: media
         nfs:
           path: /media/
           server: 10.240.1.43
-      - name: config
+      - name: radarr-config
         iscsi:
           lun: 3
           iqn: iqn.2004-04.com.qnap:ts-233:iscsi.homelab.7069f3
