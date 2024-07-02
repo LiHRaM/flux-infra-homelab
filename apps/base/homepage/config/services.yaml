@@ -32,3 +32,8 @@
         href: https://transmission.tyrannosaurus-turtle.ts.net
         description: "Downloads"
         icon: transmission.png
+        widget:
+          type: transmission
+          url: transmission.transmission.svc.cluster.local
+          username: ""
+          password: ""
