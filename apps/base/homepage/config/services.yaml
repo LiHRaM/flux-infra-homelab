@@ -3,14 +3,10 @@
         href: https://jellyfin.tyrannosaurus-turtle.ts.net
         description: "Stream media"
         icon: jellyfin.png
-    - sonarr:
-        href: https://sonarr.tyrannosaurus-turtle.ts.net
-        description: "Manage series"
-        icon: sonarr.png
-    - radarr:
-        href: https://radarr.tyrannosaurus-turtle.ts.net
-        description: "Manage movies"
-        icon: radarr.png
+    - jellyseer:
+        href: https://jellyseerr.tyrannosaurus-turtle.ts.net
+        description: "Manage series & movies"
+        icon: jellyseerr.png
     - bazarr:
         href: https://bazarr.tyrannosaurus-turtle.ts.net
         description: "Manage subtitles"
@@ -21,6 +17,14 @@
         description: "Manage books"
         icon: readarr.png
 - Shared:
+    - sonarr:
+        href: https://sonarr.tyrannosaurus-turtle.ts.net
+        description: "Manage series"
+        icon: sonarr.png
+    - radarr:
+        href: https://radarr.tyrannosaurus-turtle.ts.net
+        description: "Manage movies"
+        icon: radarr.png
     - prowlarr:
         href: https://prowlarr.tyrannosaurus-turtle.ts.net
         description: "Manage indexers"
