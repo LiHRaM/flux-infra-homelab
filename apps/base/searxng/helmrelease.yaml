@@ -1,0 +1,21 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: searxng
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: searxng
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: searxng
+  driftDetection:
+    mode: enabled
+  interval: 5m0s
+  releaseName: searxng
+  targetNamespace: searxng
+  values:
+    env:
+      TZ: "Europe/Copenhagen"
