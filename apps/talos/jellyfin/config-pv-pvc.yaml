@@ -27,3 +27,16 @@ spec:
   volumeName: jellyfin
   accessModes:
     - ReadWriteOnce
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config
+  namespace: saga
+spec:
+  storageClassName: longhorn-trusty
+  resources:
+    requests:
+      storage: 5Gi
+  accessModes:
+    - ReadWriteOnce

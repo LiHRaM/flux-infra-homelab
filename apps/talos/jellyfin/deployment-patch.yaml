@@ -20,6 +20,8 @@ spec:
           readOnly: True
         - mountPath: /config
           name: config
+        - mountPath: /config-new
+          name: config-new
       volumes:
       - name: media
         persistentVolumeClaim:
@@ -27,3 +29,6 @@ spec:
       - name: config
         persistentVolumeClaim:
           claimName: jellyfin
+      - name: config-new
+        persistentVolumeClaim:
+          claimName: jellyfin-config
