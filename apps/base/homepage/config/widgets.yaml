@@ -1,12 +1,18 @@
-    - kubernetes:
-        cluster:
-          show: false
-          cpu: true
-          memory: true
-          showLabel: true
-          label: "cluster"
-        nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
+- kubernetes:
+    cluster:
+      show: false
+      cpu: true
+      memory: true
+      showLabel: true
+      label: "cluster"
+    nodes:
+      show: true
+      cpu: true
+      memory: true
+      showLabel: true
+- search:
+    provider: custom
+    url: https://searxng.tyrannosaurus-turtle.ts.net?q=
+    target: _blank
+    suggestionUrl: https://ac.ecosia.org/autocomplete?type=list&q= # Optional
+    showSearchSuggestions: true # Optional

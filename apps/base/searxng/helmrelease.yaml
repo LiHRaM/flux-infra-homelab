@@ -19,3 +19,4 @@ spec:
   values:
     env:
       TZ: "Europe/Copenhagen"
+      AUTOCOMPLETE: "wikipedia"
