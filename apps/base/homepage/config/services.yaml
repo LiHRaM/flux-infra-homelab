@@ -1,4 +1,4 @@
-- Jess Can Touch:
+- Movies & TV:
     - jellyfin:
         href: https://jellyfin.tyrannosaurus-turtle.ts.net
         description: "Stream media"
@@ -11,15 +11,16 @@
         href: https://radarr.tyrannosaurus-turtle.ts.net
         description: "Manage movies"
         icon: radarr.png
-- You Probably Don't Care About This:
-    - readarr:
-        href: https://readarr.tyrannosaurus-turtle.ts.net
-        description: "Manage books"
-        icon: readarr.png
     - bazarr:
         href: https://bazarr.tyrannosaurus-turtle.ts.net
         description: "Manage subtitles"
         icon: bazarr.png
+- Books:
+    - readarr:
+        href: https://readarr.tyrannosaurus-turtle.ts.net
+        description: "Manage books"
+        icon: readarr.png
+- Shared:
     - prowlarr:
         href: https://prowlarr.tyrannosaurus-turtle.ts.net
         description: "Manage indexers"
@@ -33,7 +34,7 @@
         description: "Downloads"
         icon: transmission.png
         widget:
-          type: transmission
-          url: transmission.transmission.svc.cluster.local
-          username: ""
-          password: ""
+            type: transmission
+            url: transmission.transmission.svc.cluster.local
+            username: ""
+            password: ""
