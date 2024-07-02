@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyseerr
+  labels:
+    app: jellyseerr
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyseerr
+  template:
+    metadata:
+      labels:
+        app: jellyseerr
+    spec:
+      containers:
+        - name: jellyseerr
+          image: fallenbagel/jellyseerr:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5055
+              protocol: TCP
+              name: http
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false

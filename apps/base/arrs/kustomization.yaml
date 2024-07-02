@@ -11,6 +11,8 @@ resources:
 - readarr-service.yaml
 - bazarr-deployment.yaml
 - bazarr-service.yaml
+- jellyseerr-deployment.yaml
+- jellyseerr-service.yaml
 
 patches:
   - target:

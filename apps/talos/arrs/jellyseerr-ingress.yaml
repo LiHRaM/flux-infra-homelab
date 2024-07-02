@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyseerr
+spec:
+  defaultBackend:
+    service:
+      name: jellyseerr
+      port:
+        name: http
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - jellyseerr
