@@ -10,6 +10,12 @@
       cpu: true
       memory: true
       showLabel: true
+- longhorn:
+    expanded: false
+    total: true
+    labels: true
+    nodes: true
+    include: []
 - search:
     provider: custom
     url: https://searxng.tyrannosaurus-turtle.ts.net?q=
