@@ -39,6 +39,6 @@
         icon: transmission.png
         widget:
             type: transmission
-            url: transmission.transmission.svc.cluster.local
+            url: http://transmission.transmission.svc.cluster.local:9091
             username: ""
             password: ""
