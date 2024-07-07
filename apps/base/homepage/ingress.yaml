@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: homepage
   namespace: default
+  labels:
+    hilmargustafs.com/group: internal
 spec:
   defaultBackend:
     service:

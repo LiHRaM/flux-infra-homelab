@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: jellyfin
   namespace: saga
+  labels:
+    hilmargustafs.com/group: internal
 spec:
   defaultBackend:
     service:

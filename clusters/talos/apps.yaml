@@ -17,3 +17,13 @@ spec:
   dependsOn:
     - name: infrastructure
     - name: secrets
+  patches:
+    - target:
+        group: networking.k8s.io
+        version: v1
+        kind: Ingress
+        labelSelector: hilmargustafs.com/group=internal
+      patch: |-
+        - op: add
+          path: /metadata/annotations/tailscale.com~1tags
+          value: "tag:k8s,tag:internal"
