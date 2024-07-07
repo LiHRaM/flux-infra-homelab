@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: jellyfin
   namespace: saga
+  tailscale.com/tags: "tag:k8s,tag:internal"
 spec:
   defaultBackend:
     service:

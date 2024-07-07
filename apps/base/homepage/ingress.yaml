@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: homepage
   namespace: default
+  tailscale.com/tags: "tag:k8s,tag:internal"
 spec:
   defaultBackend:
     service:
