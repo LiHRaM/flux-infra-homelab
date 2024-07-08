@@ -11,6 +11,8 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: minicloudlabs
+  driftDetection:
+    mode: enabled
   interval: 5m0s
   releaseName: gatus
   targetNamespace: minicloudlabs

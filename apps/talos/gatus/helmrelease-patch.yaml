@@ -1,0 +1,31 @@
+- op: add
+  path: /spec/values
+  value:
+    ingress:
+      enabled: true
+      ingressClassName: tailscale
+      hosts:
+        - gatus
+      tls:
+        - hosts:
+          - gatus
+    persistence:
+      enabled: true
+      size: 200Mi
+      storageClassName: longhorn-trusty
+    config:
+      storage:
+        type: sqlite
+        path: /data/data.db
+        caching: true
+      endpoints:
+        - name: jellyfin
+          interval: 5m
+          url: http://jellyfin.saga.svc.cluster.local/health
+          conditions:
+            - '[STATUS] == 200'
+        - name: jellyseerr
+          interval: 5m
+          url: http://jellyseerr.arrs.svc.cluster.local:5055/api/v1/status
+          conditions:
+            - '[STATUS] == 200'
