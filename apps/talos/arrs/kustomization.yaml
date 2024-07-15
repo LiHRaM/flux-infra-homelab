@@ -16,6 +16,8 @@ resources:
 - bazarr-config-pvc.yaml
 - jellyseerr-ingress.yaml
 - jellyseerr-config-pvc.yaml
+- autobrr-ingress.yaml
+- autobrr-config-pvc.yaml
 
 namespace: arrs
 
@@ -26,3 +28,4 @@ patches:
 - path: readarr-deployment-patch.yaml
 - path: bazarr-deployment-patch.yaml
 - path: jellyseerr-deployment-patch.yaml
+- path: autobrr-deployment-patch.yaml

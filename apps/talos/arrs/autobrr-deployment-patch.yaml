@@ -1,0 +1,20 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autobrr
+spec:
+  selector:
+    matchLabels:
+      app: autobrr
+  template:
+    spec:
+      containers:
+      - name: autobrr
+        volumeMounts:
+        - mountPath: /config
+          name: autobrr-config
+      volumes:
+      - name: autobrr-config
+        persistentVolumeClaim:
+          claimName: autobrr-config
