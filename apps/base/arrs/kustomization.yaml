@@ -13,8 +13,6 @@ resources:
 - bazarr-service.yaml
 - jellyseerr-deployment.yaml
 - jellyseerr-service.yaml
-- autobrr-deployment.yaml
-- autobrr-service.yaml
 
 patches:
   - target:
