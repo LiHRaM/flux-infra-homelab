@@ -1,8 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: searxng
+  name: itzg
   namespace: flux-system
 spec:
   interval: 1m0s
-  url: https://charts.searxng.org
+  url: https://itzg.github.io/minecraft-server-charts/

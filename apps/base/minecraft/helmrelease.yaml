@@ -1,22 +1,18 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: searxng
+  name: minecraft
   namespace: flux-system
 spec:
   chart:
     spec:
-      chart: searxng
+      chart: minecraft
       reconcileStrategy: ChartVersion
       sourceRef:
         kind: HelmRepository
-        name: searxng
+        name: itzg
   driftDetection:
     mode: enabled
   interval: 5m0s
-  releaseName: searxng
-  targetNamespace: searxng
-  values:
-    env:
-      TZ: "Europe/Copenhagen"
-      AUTOCOMPLETE: "wikipedia"
+  releaseName: minecraft
+  targetNamespace: minecraft

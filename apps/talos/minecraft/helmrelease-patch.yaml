@@ -1,0 +1,6 @@
+- op: add
+  path: /spec/values
+  value:
+    eula: "TRUE"
+    version: "LATEST"
+    type: "PAPER"
