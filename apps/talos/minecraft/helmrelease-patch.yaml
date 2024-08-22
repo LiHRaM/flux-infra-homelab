@@ -8,4 +8,4 @@
       motd: ""
       pvp: false
     persistence:
-      storageClass: longhorn-trusty
+      storageClassName: longhorn-trusty
