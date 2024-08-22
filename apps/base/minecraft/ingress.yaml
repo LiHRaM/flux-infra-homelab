@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minecraft
+  namespace: minecraft
+spec:
+  defaultBackend:
+    service:
+      name: minecraft-minecraft
+      port:
+        name: minecraft
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - minecraft
