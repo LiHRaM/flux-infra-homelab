@@ -2,14 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../../base/minecraft
-- minecraft-config-pvc.yaml
-
 patches:
   - path: helmrelease-patch.yaml
     target:
       kind: HelmRelease
-      name: minecraft
-  - path: deployment-patches.yaml
-    target:
-      kind: Deployment
       name: minecraft

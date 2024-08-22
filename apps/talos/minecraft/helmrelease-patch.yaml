@@ -1,6 +1,11 @@
 - op: add
   path: /spec/values
   value:
-    eula: "TRUE"
-    version: "LATEST"
-    type: "PAPER"
+    minecraftServer:
+      eula: "TRUE"
+      version: "LATEST"
+      type: "PAPER"
+      motd: ""
+      pvp: false
+    persistence:
+      storageClass: longhorn-trusty
