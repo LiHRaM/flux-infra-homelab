@@ -1,6 +1,22 @@
-- op: add
-  path: /spec/values
-  value:
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: minecraft-homebase
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: minecraft
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: itzg
+  driftDetection:
+    mode: enabled
+  interval: 5m0s
+  releaseName: minecraft
+  targetNamespace: minecraft
+  values:
     minecraftServer:
       eula: "TRUE"
       version: "LATEST"
@@ -24,4 +40,14 @@
             loadBalancerClass: tailscale
     persistence:
       storageClassName: longhorn
-    
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              version: v1
+              kind: Service
+              namespace: minecraft
+            patch: |-
+              - op: replace
+                path: /spec/loadBalancerClass
+                value: tailscale
