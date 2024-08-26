@@ -19,9 +19,7 @@ spec:
     - kustomize:
         patches:
           - target:
-              version: v1
               kind: Service
-              namespace: minecraft
             patch: |-
               - op: replace
                 path: /spec/type
