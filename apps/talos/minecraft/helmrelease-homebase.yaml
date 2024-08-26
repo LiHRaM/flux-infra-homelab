@@ -54,3 +54,12 @@ spec:
       storageClassName: longhorn-trusty
       dataDir:
         enabled: true
+    rcon:
+      enabled: true
+      withGeneratedPassword: true
+    mcbackup:
+      enabled: true
+      persistence:
+        storageClassName: longhorn-trusty
+        backupDir:
+          enabled: true
