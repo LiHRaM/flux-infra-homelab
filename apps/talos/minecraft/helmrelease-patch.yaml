@@ -5,11 +5,23 @@
       eula: "TRUE"
       version: "LATEST"
       type: "PAPER"
+      pluginUrls:
+        - https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
+        - https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
       motd: ""
       pvp: false
       serviceType: LoadBalancer
       extraServiceSpec:
         loadBalancerClass: tailscale
+      extraPorts:
+        - name: geyser
+          containerPort: 19132
+          protocol: TCP
+          service:
+            enabled: true
+            type: LoadBalancer
+            port: 19132
+            loadBalancerClass: tailscale
     persistence:
-      storageClassName: longhorn-trusty
+      storageClassName: longhorn
     
