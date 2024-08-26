@@ -8,5 +8,8 @@ spec:
     service:
       name: minecraft-minecraft
       port:
-        name: minecraft
+        number: 25565
   ingressClassName: tailscale
+  tls:
+    - hosts:
+        - minecraft
