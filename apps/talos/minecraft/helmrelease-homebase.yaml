@@ -43,7 +43,7 @@ spec:
       extraPorts:
         - name: geyser
           containerPort: 19132
-          protocol: TCP
+          protocol: UDP
           service:
             enabled: true
             type: LoadBalancer
