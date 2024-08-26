@@ -4,18 +4,31 @@ metadata:
   name: minecraft-homebase
   namespace: flux-system
 spec:
-  chart:
-    spec:
-      chart: minecraft
-      reconcileStrategy: ChartVersion
-      sourceRef:
-        kind: HelmRepository
-        name: itzg
+  install:
+    remediation:
+      retries: 3
+  chartRef:
+    kind: HelmChart
+    name: minecraft-java-server
   driftDetection:
     mode: enabled
   interval: 5m0s
   releaseName: minecraft
   targetNamespace: minecraft
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              version: v1
+              kind: Service
+              namespace: minecraft
+            patch: |-
+              - op: replace
+                path: /spec/type
+                value: LoadBalancer
+              - op: add
+                path: /spec/loadBalancerClass
+                value: tailscale
   values:
     minecraftServer:
       eula: "TRUE"
