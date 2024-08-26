@@ -7,5 +7,7 @@
       type: "PAPER"
       motd: ""
       pvp: false
+      serviceType: LoadBalancer
     persistence:
       storageClassName: longhorn-trusty
+    
