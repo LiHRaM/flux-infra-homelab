@@ -27,8 +27,6 @@ spec:
       motd: ""
       pvp: false
       serviceType: LoadBalancer
-      extraServiceSpec:
-        loadBalancerClass: tailscale
       extraPorts:
         - name: geyser
           containerPort: 19132
@@ -39,15 +37,6 @@ spec:
             port: 19132
             loadBalancerClass: tailscale
     persistence:
-      storageClassName: longhorn
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              version: v1
-              kind: Service
-              namespace: minecraft
-            patch: |-
-              - op: replace
-                path: /spec/loadBalancerClass
-                value: tailscale
+      storageClassName: longhorn-trusty
+      dataDir:
+        enabled: true
