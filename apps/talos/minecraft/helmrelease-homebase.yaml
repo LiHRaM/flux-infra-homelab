@@ -7,6 +7,9 @@ spec:
   install:
     remediation:
       retries: 3
+  upgrade:
+    cleanupOnFail: true
+    force: true
   chartRef:
     kind: HelmChart
     name: minecraft-java-server
