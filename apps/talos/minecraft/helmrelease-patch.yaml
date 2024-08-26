@@ -8,6 +8,8 @@
       motd: ""
       pvp: false
       serviceType: LoadBalancer
+      extraServiceSpec:
+        loadBalancerClass: tailscale
     persistence:
       storageClassName: longhorn-trusty
     
