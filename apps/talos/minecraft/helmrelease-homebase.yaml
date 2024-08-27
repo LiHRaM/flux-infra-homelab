@@ -51,7 +51,7 @@ spec:
             port: 19132
             loadBalancerClass: tailscale
     persistence:
-      storageClassName: longhorn-trusty
+      storageClass: longhorn-trusty
       dataDir:
         enabled: true
     rcon:
@@ -60,14 +60,6 @@ spec:
     mcbackup:
       enabled: true
       persistence:
+        storageClass: longhorn-trusty
         backupDir:
-          enabled: false
-    extraVolumes:
-      - volumeMounts:
-          - mountPath: /backups
-            name: backup
-        volumes:
-          - name: backup
-            nfs:
-              path: /media/minecraft
-              server: 10.240.1.43
+          enabled: true
