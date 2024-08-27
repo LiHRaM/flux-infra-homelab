@@ -60,6 +60,14 @@ spec:
     mcbackup:
       enabled: true
       persistence:
-        storageClassName: longhorn-trusty
         backupDir:
-          enabled: true
+          enabled: false
+    extraVolumes:
+      - volumeMounts:
+          - mountPath: /backups
+            name: backup
+        volumes:
+          - name: backup
+            nfs:
+              path: /media/minecraft
+              server: 10.240.1.43
