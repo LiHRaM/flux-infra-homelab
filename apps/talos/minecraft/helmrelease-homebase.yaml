@@ -40,6 +40,7 @@ spec:
         - https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
       motd: ""
       pvp: false
+      ops: lihram
       serviceType: LoadBalancer
       extraPorts:
         - name: geyser
