@@ -36,6 +36,8 @@ spec:
       version: "LATEST"
       type: "PAPER"
       pluginUrls:
+        # Hangar URL: https://hangar.papermc.io/
+        # Hangar shows all available PaperMC plugins that are compatible with this instance.
         - https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
         - https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
         - https://github.com/JNNGL/VanillaMinimaps/releases/download/v1.0.0/vanillaminimaps-1.0.0.jar
