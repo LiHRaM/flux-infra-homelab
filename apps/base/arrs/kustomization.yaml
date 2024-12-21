@@ -13,6 +13,9 @@ resources:
 - bazarr-service.yaml
 - jellyseerr-deployment.yaml
 - jellyseerr-service.yaml
+- recyclarr-config.yaml
+- recyclarr-radarr.yaml
+- recyclarr-sonarr.yaml
 
 patches:
   - target:

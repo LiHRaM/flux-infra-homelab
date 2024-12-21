@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: recyclarr-radarr
   labels:
-    app: recyclarr-radarr
+    app: recyclarr-sync
 spec:
   schedule: "0 6 * * *"
   jobTemplate:

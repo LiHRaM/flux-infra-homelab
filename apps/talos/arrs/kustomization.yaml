@@ -16,6 +16,7 @@ resources:
 - bazarr-config-pvc.yaml
 - jellyseerr-ingress.yaml
 - jellyseerr-config-pvc.yaml
+- recyclarr-config-pvc.yaml
 
 namespace: arrs
 
@@ -26,3 +27,5 @@ patches:
 - path: readarr-deployment-patch.yaml
 - path: bazarr-deployment-patch.yaml
 - path: jellyseerr-deployment-patch.yaml
+- path: recyclarr-job-patch.yaml
+- path: recyclarr-cronjob-patch.yaml
