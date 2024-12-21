@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: recyclarr-sonarr
+  labels:
+    app: recyclarr-sonarr
+spec:
+  schedule: "0 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: recyclarr
+              image: ghcr.io/recyclarr/recyclarr:latest
+              imagePullPolicy: always
+              envFrom:
+                - configMapRef:
+                    name: linuxserver-common
+                    optional: false
+              command: ["sonarr"]
+          restartPolicy: OnFailure

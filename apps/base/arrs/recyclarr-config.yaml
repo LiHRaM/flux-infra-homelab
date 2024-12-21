@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: recyclarr-config
+  labels:
+    app: recyclarr-config
+spec:
+  template:
+    spec:
+      containers:
+        - name: recyclarr
+          image: ghcr.io/recyclarr/recyclarr:latest
+          imagePullPolicy: always
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false
+          command: ["config", "create"]
+      restartPolicy: OnFailure
