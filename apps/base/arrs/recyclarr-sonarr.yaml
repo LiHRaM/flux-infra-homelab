@@ -18,5 +18,5 @@ spec:
                 - configMapRef:
                     name: linuxserver-common
                     optional: false
-              command: ["sonarr"]
+              command: ["recyclarr", "sync", "sonarr"]
           restartPolicy: OnFailure

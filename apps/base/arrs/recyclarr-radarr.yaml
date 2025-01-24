@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=...
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.22.12/cronjob-batch-v1.json
 
 apiVersion: batch/v1
 kind: CronJob
@@ -12,6 +12,7 @@ spec:
     spec:
       template:
         spec:
+          restartPolicy: OnFailure
           containers:
             - name: recyclarr
               image: ghcr.io/recyclarr/recyclarr:latest
@@ -21,4 +22,25 @@ spec:
                     name: linuxserver-common
                     optional: false
               command: ["recyclarr", "sync", "radarr"]
-          restartPolicy: OnFailure
+              volumeMounts:
+                - name: recyclarr-secrets
+                  mountPath: /config/secrets.yml
+                  subPath: secrets.yml
+                  readOnly: true
+                - name: recyclarr-config
+                  mountPath: /config/recyclarr.yml
+                  subPath: recyclarr.yml
+                  readOnly: true
+          volumes:
+            - name: secrets
+              secret:
+                secretName: recyclarr-config
+                items:
+                  - key: secrets.yml
+                    path: secrets.yml
+            - name: config
+              configMap:
+                name: recyclarr-config
+                items:
+                  - key: recyclarr.yml
+                    path: recyclarr.yml
