@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=...
+
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -13,7 +15,7 @@ spec:
           containers:
             - name: recyclarr
               image: ghcr.io/recyclarr/recyclarr:latest
-              imagePullPolicy: always
+              imagePullPolicy: Always
               envFrom:
                 - configMapRef:
                     name: linuxserver-common

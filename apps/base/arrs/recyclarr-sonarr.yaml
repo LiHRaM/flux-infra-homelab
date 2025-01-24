@@ -13,7 +13,7 @@ spec:
           containers:
             - name: recyclarr
               image: ghcr.io/recyclarr/recyclarr:latest
-              imagePullPolicy: always
+              imagePullPolicy: Always
               envFrom:
                 - configMapRef:
                     name: linuxserver-common
