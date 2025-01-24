@@ -23,11 +23,11 @@ spec:
                     optional: false
               command: ["recyclarr", "sync", "radarr"]
               volumeMounts:
-                - name: recyclarr-secrets
+                - name: secrets
                   mountPath: /config/secrets.yml
                   subPath: secrets.yml
                   readOnly: true
-                - name: recyclarr-config
+                - name: config
                   mountPath: /config/recyclarr.yml
                   subPath: recyclarr.yml
                   readOnly: true
