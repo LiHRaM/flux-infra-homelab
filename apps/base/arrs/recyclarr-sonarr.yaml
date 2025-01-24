@@ -10,6 +10,7 @@ spec:
     spec:
       template:
         spec:
+          restartPolicy: OnFailure
           containers:
             - name: recyclarr
               image: ghcr.io/recyclarr/recyclarr:latest
@@ -19,4 +20,25 @@ spec:
                     name: linuxserver-common
                     optional: false
               command: ["recyclarr", "sync", "sonarr"]
-          restartPolicy: OnFailure
+              volumeMounts:
+                - name: secrets
+                  mountPath: /config/secrets.yml
+                  subPath: secrets.yml
+                  readOnly: true
+                - name: config
+                  mountPath: /config/recyclarr.yml
+                  subPath: recyclarr.yml
+                  readOnly: true
+          volumes:
+            - name: secrets
+              secret:
+                secretName: recyclarr-config
+                items:
+                  - key: secrets.yml
+                    path: secrets.yml
+            - name: config
+              configMap:
+                name: recyclarr-config
+                items:
+                  - key: recyclarr.yml
+                    path: recyclarr.yml
