@@ -20,5 +20,5 @@ spec:
                 - configMapRef:
                     name: linuxserver-common
                     optional: false
-              command: ["radarr"]
+              command: ["sync", "radarr"]
           restartPolicy: OnFailure
