@@ -11,8 +11,6 @@ resources:
 - readarr-service.yaml
 - bazarr-deployment.yaml
 - bazarr-service.yaml
-- jellyseerr-deployment.yaml
-- jellyseerr-service.yaml
 - recyclarr-radarr.yaml
 - recyclarr-sonarr.yaml
 
@@ -28,15 +26,6 @@ patches:
           limits:
             cpu: 200m
             memory: 300Mi
-  - target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: jellyseerr
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/memory
-        value: 500Mi
   - target:
       group: apps
       version: v1

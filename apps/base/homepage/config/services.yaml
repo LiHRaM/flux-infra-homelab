@@ -3,10 +3,6 @@
         href: https://jellyfin.tyrannosaurus-turtle.ts.net
         description: "Stream media"
         icon: jellyfin.png
-    - jellyseer:
-        href: https://jellyseerr.tyrannosaurus-turtle.ts.net
-        description: "Manage series & movies"
-        icon: jellyseerr.png
     - bazarr:
         href: https://bazarr.tyrannosaurus-turtle.ts.net
         description: "Manage subtitles"
