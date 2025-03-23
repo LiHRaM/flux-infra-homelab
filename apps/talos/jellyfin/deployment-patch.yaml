@@ -9,6 +9,12 @@ spec:
       app: jellyfin
   template:
     spec:
+      affinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: DoesNotExist
       containers:
       - name: jellyfin
         resources:
