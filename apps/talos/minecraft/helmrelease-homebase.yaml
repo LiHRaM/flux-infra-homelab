@@ -30,7 +30,12 @@ spec:
               - op: add
                 path: /spec/loadBalancerClass
                 value: tailscale
+
   values:
+    # Reference: https://github.com/itzg/minecraft-server-charts/blob/master/charts/minecraft/values.yaml
+    #
+    # Set to 1 to play
+    replicaCount: 0
     minecraftServer:
       eula: "TRUE"
       version: "LATEST"
