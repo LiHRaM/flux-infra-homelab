@@ -26,6 +26,9 @@ spec:
       containers:
         - name: homepage
           image: "ghcr.io/gethomepage/homepage:v1.0.4"
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: homepage.tyrannosaurus-turtle.ts.net
           resources:
             requests:
               cpu: 200m
