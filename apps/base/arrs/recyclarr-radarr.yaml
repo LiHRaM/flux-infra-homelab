@@ -15,7 +15,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: recyclarr
-              image: ghcr.io/recyclarr/recyclarr:latest
+              image: ghcr.io/recyclarr/recyclarr:7.4.1
               imagePullPolicy: Always
               envFrom:
                 - configMapRef:
