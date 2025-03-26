@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.14.0/deployment-apps-v1.json
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,7 +21,7 @@ spec:
       initContainers:
         # Inspired by: https://github.com/qdm12/gluetun-wiki/pull/7#issuecomment-2190007011
         - name: gluetun
-          image: "ghcr.io/qdm12/gluetun:latest"
+          image: "ghcr.io/qdm12/gluetun:v3.40"
           imagePullPolicy: Always
           restartPolicy: Always
           ports:
@@ -57,7 +58,7 @@ spec:
         - configMapRef:
             name: transmission-config
             optional: false
-        image: lscr.io/linuxserver/transmission:latest
+        image: ghcr.io/linuxserver/transmission:4.0.6
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
