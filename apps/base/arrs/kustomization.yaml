@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
 - prowlarr-deployment.yaml
 - prowlarr-service.yaml
+- prowlarr-image-repository.yaml
+- prowlarr-image-policy.yaml
 - radarr-deployment.yaml
 - radarr-service.yaml
 - sonarr-deployment.yaml
