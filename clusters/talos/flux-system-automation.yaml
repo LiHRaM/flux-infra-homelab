@@ -17,7 +17,7 @@ spec:
         .NewValue}}{{end}}'
     push:
       branch: main
-  interval: 1h0m0s
+  interval: 12h0m0s
   sourceRef:
     kind: GitRepository
     name: flux-system

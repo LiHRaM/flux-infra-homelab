@@ -16,6 +16,6 @@ spec:
         name: tailscale
   driftDetection:
     mode: enabled
-  interval: 5m0s
+  interval: 24h0m0s
   releaseName: tailscale-operator
   targetNamespace: tailscale

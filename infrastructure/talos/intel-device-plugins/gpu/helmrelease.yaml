@@ -14,7 +14,7 @@ spec:
         name: intel-device-plugins
         namespace: flux-system
       version: 0.30.0
-  interval: 1m0s
+  interval: 12h0m0s
   releaseName: intel-device-plugins-gpu
   targetNamespace: intel-device-plugins
   driftDetection:

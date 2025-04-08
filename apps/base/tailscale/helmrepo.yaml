@@ -4,5 +4,5 @@ metadata:
   name: tailscale
   namespace: flux-system
 spec:
-  interval: 1m0s
+  interval: 12h0m0s
   url: https://pkgs.tailscale.com/helmcharts

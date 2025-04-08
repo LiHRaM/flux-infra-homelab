@@ -4,7 +4,7 @@ metadata:
   name: minecraft-java-server
   namespace: flux-system
 spec:
-  interval: 5m0s
+  interval: 12h0m0s
   chart: minecraft
   reconcileStrategy: ChartVersion
   sourceRef:
