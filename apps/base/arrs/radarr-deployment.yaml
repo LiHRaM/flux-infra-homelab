@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: radarr
-          image: ghcr.io/linuxserver/radarr:5.21.1
+          image: ghcr.io/linuxserver/radarr:5.21.1 # {"$imagepolicy": "flux-system:radarr"}
           imagePullPolicy: Always
           ports:
             - containerPort: 7878
