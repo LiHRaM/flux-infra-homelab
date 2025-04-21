@@ -1,14 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jellyfin
-  namespace: saga
+  name: bitplay
+  namespace: streaming
   labels:
     hilmargustafs.com/group: internal
 spec:
   defaultBackend:
     service:
-      name: jellyfin
+      name: bitplay
       port:
         number: 80
   ingressClassName: tailscale
