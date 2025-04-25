@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bitplay-pod
+      app: bitplay
   template:
     metadata:
       labels:
-        app: bitplay-pod
+        app: bitplay
     spec:
       containers:
         - name: bitplay
