@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bitplay
+  namespace: streaming
   labels:
     app: bitplay
-    namespace: streaming
 spec:
   replicas: 1
   selector:
