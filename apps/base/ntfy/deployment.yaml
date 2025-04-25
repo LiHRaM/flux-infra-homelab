@@ -16,7 +16,7 @@ spec:
         app: ntfy-pod
     spec:
       containers:
-        - name: ntfy 
+        - name: ntfy
           image: binwiederhier/ntfy:v1.28.0
           args: ["serve"]
           envFrom:
