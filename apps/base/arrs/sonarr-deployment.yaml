@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: sonarr
-          image: ghcr.io/linuxserver/sonarr:4.0.14 # {"$imagepolicy": "flux-system:sonarr"}
+          image: ghcr.io/linuxserver/sonarr:4.0.15 # {"$imagepolicy": "flux-system:sonarr"}
           imagePullPolicy: Always
           ports:
             - containerPort: 8989
