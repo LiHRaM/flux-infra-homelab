@@ -22,5 +22,5 @@ spec:
     kind: GitRepository
     name: flux-system
   update:
-    path: ./clusters/talos
+    path: ./
     strategy: Setters
