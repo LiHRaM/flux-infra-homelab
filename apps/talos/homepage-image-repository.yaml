@@ -1,0 +1,9 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: homepage
+  namespace: flux-system
+spec:
+  image: ghcr.io/gethomepage/homepage
+  interval: 2h0m0s
