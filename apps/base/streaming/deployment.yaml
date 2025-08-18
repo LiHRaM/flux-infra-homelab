@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,6 +23,15 @@ spec:
             limits:
               cpu: 100m
               memory: 200Mi
+          env:
+            - name: PROWLARR_URL
+              value: "http://prowlarr.arrs.svc.cluster.local:9696"
+            - name: PROWLARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: prowlarr-api-key
+                  key: api-key
+                  optional: true
           ports:
             - containerPort: 3347
               protocol: TCP
