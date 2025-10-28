@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: bitplay
-          image: ghcr.io/aculix/bitplay:main
+          image: ghcr.io/aculix/bitplay:1.0.0 # {"$imagepolicy": "flux-system:bitplay"}
           imagePullPolicy: IfNotPresent
           resources:
             limits:
