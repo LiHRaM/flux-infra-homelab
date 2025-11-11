@@ -1,16 +1,21 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
 
 sonarr:
+
   web-1080p-v4:
     base_url: !secret sonarr_url
     api_key: !secret sonarr_apikey
 
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
-    
+
     include:
       - template: sonarr-quality-definition-series
       - template: sonarr-v4-quality-profile-web-1080p
+
+    quality_definition:
+      type: movie
+      preferred_ratio: 0.075
 
     custom_formats:
       # Optional
@@ -47,6 +52,10 @@ radarr:
       - template: radarr-quality-definition-movie
       - template: radarr-quality-profile-remux-web-1080p
       - template: radarr-custom-formats-remux-web-1080p
+
+    quality_definition:
+      type: movie
+      preferred_ratio: 0.075
 
     custom_formats:
       - trash_ids:
