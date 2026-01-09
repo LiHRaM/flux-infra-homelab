@@ -9,4 +9,4 @@ spec:
     name: jellyfin
   policy:
     semver:
-      range: '>=10.10.7 <10.11.0'
+      range: '>=10.10.7 <10.12.0'
