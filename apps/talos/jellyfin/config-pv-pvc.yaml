@@ -8,6 +8,6 @@ spec:
   storageClassName: longhorn-trusty
   resources:
     requests:
-      storage: 10Gi
+      storage: 15Gi
   accessModes:
     - ReadWriteOnce
