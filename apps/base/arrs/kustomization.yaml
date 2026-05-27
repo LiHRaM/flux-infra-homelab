@@ -7,8 +7,6 @@ resources:
 - radarr-service.yaml
 - sonarr-deployment.yaml
 - sonarr-service.yaml
-- readarr-deployment.yaml
-- readarr-service.yaml
 - bazarr-deployment.yaml
 - bazarr-service.yaml
 - recyclarr-radarr.yaml
@@ -35,12 +33,3 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: 400Mi
-  - target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: readarr
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/memory
-        value: 600Mi

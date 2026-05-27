@@ -10,8 +10,6 @@ resources:
 - radarr-config-pvc.yaml
 - sonarr-ingress.yaml
 - sonarr-config-pvc.yaml
-- readarr-ingress.yaml
-- readarr-config-pvc.yaml
 - bazarr-ingress.yaml
 - bazarr-config-pvc.yaml
 
@@ -21,7 +19,6 @@ patches:
 - path: prowlarr-deployment-patch.yaml
 - path: radarr-deployment-patch.yaml
 - path: sonarr-deployment-patch.yaml
-- path: readarr-deployment-patch.yaml
 - path: bazarr-deployment-patch.yaml
 
 configMapGenerator:
