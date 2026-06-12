@@ -1,0 +1,14 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: recyclarr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: recyclarr
+  policy:
+    semver:
+      # Stay on 7.x. v8 removed `replace_existing_custom_formats`, which this
+      # cache-less CronJob relies on to re-adopt its custom formats each run.
+      range: '>=7.5.2 <8.0.0'
