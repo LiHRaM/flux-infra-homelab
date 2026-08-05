@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lidarr
+spec:
+  selector:
+    matchLabels:
+      app: lidarr
+  template:
+    spec:
+      containers:
+      - name: lidarr
+        volumeMounts:
+        - mountPath: /media
+          name: media
+        - mountPath: /config
+          name: lidarr-config
+      volumes:
+      - name: media
+        nfs:
+          path: /media/
+          server: 10.240.1.43
+      - name: lidarr-config
+        persistentVolumeClaim:
+          claimName: lidarr-config

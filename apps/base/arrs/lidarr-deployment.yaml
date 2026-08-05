@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.14.0/deployment-apps-v1.json
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lidarr
+  labels:
+    app: lidarr
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lidarr
+  template:
+    metadata:
+      labels:
+        app: lidarr
+    spec:
+      containers:
+        - name: lidarr
+          image: ghcr.io/linuxserver/lidarr:3.1.0 # {"$imagepolicy": "flux-system:lidarr"}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8686
+              protocol: TCP
+              name: http
+          envFrom:
+            - configMapRef:
+                name: linuxserver-common
+                optional: false

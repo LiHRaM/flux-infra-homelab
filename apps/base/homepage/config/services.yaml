@@ -20,6 +20,10 @@
         href: https://prowlarr.tyrannosaurus-turtle.ts.net
         description: "Manage indexers"
         icon: prowlarr.png
+    - lidarr:
+        href: https://lidarr.tyrannosaurus-turtle.ts.net
+        description: "Manage music"
+        icon: lidarr.png
     - ntfy:
         href: https://ntfy.tyrannosaurus-turtle.ts.net
         description: "Notifications"

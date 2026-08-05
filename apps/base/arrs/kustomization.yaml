@@ -7,6 +7,8 @@ resources:
 - radarr-service.yaml
 - sonarr-deployment.yaml
 - sonarr-service.yaml
+- lidarr-deployment.yaml
+- lidarr-service.yaml
 - bazarr-deployment.yaml
 - bazarr-service.yaml
 - recyclarr-radarr.yaml
