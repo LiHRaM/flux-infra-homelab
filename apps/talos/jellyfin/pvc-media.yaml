@@ -8,5 +8,6 @@ spec:
     requests:
       storage: 3.97Ti
   volumeName: media
+  storageClassName: ""
   accessModes:
     - ReadWriteMany
