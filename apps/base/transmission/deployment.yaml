@@ -90,4 +90,4 @@ spec:
       - name: media
         nfs:
           path: /media/Transmission
-          server: 10.240.1.43
+          server: 192.168.1.188
