@@ -11,5 +11,8 @@ spec:
     - name: stream
       port: 8097
       targetPort: 8097
+    - name: sendspin
+      port: 8927
+      targetPort: 8927
   selector:
     app: music-assistant
