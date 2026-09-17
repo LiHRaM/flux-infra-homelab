@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-assistant
+  labels:
+    app: music-assistant
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: music-assistant
+  template:
+    metadata:
+      labels:
+        app: music-assistant
+    spec:
+      containers:
+        - name: music-assistant
+          image: ghcr.io/music-assistant/server:2.9.13 # {"$imagepolicy": "flux-system:music-assistant"}
+          imagePullPolicy: IfNotPresent
+          args:
+            - --data-dir=/data
+            - --cache-dir=/data/.cache
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          ports:
+            - containerPort: 8095
+              protocol: TCP
+              name: http
+            - containerPort: 8097
+              protocol: TCP
+              name: stream
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: music-assistant-data

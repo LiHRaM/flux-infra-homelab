@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: music-assistant
+  namespace: smarthome
+  labels:
+    hilmargustafs.com/group: internal
+spec:
+  defaultBackend:
+    service:
+      name: music-assistant
+      port:
+        number: 8095
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - music-assistant
