@@ -1,0 +1,8 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: music-assistant
+  namespace: flux-system
+spec:
+  image: ghcr.io/music-assistant/server
+  interval: 2h0m0s
