@@ -5,6 +5,7 @@ metadata:
   namespace: smarthome
   labels:
     hilmargustafs.com/group: internal
+    hilmargustafs.com/media: "true"
 spec:
   defaultBackend:
     service:

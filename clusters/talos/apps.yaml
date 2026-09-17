@@ -27,3 +27,15 @@ spec:
         - op: add
           path: /metadata/annotations/tailscale.com~1tags
           value: "tag:k8s,tag:internal"
+    # MA proxy carries its own dedicated tag so the ACL can scope the router to
+    # exactly one node. The internal patch above has already set the annotation
+    # (runs first), so this REPLACES the value with media appended.
+    - target:
+        group: networking.k8s.io
+        version: v1
+        kind: Ingress
+        labelSelector: hilmargustafs.com/media=true
+      patch: |-
+        - op: replace
+          path: /metadata/annotations/tailscale.com~1tags
+          value: "tag:k8s,tag:internal,tag:media"
