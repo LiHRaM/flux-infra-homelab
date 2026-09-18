@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.14.0/deployment-apps-v1.json
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: qbittorrent
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: qbittorrent
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      initContainers:
+        # Mirrors transmission: gluetun OpenVPN sidecar owns the pod network so
+        # qBittorrent's torrent traffic egresses through Surfshark. Shares the
+        # network namespace (no networkPolicy separation needed for testing).
+        - name: gluetun
+          image: "ghcr.io/qdm12/gluetun:v3.40"
+          imagePullPolicy: Always
+          restartPolicy: Always
+          envFrom:
+            - secretRef:
+                name: gluetun
+                optional: false
+            - configMapRef:
+                name: linuxserver-common
+                optional: false
+          env:
+          - name: FIREWALL_DEBUG
+            value: "on"
+          - name: FIREWALL_INPUT_PORTS
+            value: "8080,51161"
+          securityContext:
+            capabilities:
+              add:
+              - NET_ADMIN
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: linuxserver-common
+            optional: false
+        image: ghcr.io/linuxserver/qbittorrent:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 3
+        name: qbittorrent
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2000Mi
+        volumeMounts:
+        - mountPath: /media/Transmission
+          name: media
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: media
+        nfs:
+          path: /media/Transmission
+          server: 192.168.1.188

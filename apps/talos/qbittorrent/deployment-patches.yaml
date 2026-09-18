@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://json.schemastore.org/json-patch.json
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /config
+    name: config
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config
+    persistentVolumeClaim:
+      claimName: qbittorrent-config
+# Same ClusterFirst DNS trap as transmission: ndots:5 churns public tracker
+# hostnames through K8s + .lan search domains, which time out inside gluetun's
+# DNS. ndots:1 resolves absolute-first so tracker announces work. Verified on
+# transmission; replicate here at deploy time so qBit doesn't hit the same stall.
+- op: add
+  path: /spec/template/spec/dnsConfig
+  value:
+    options:
+      - name: ndots
+        value: "1"
