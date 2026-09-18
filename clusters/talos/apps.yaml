@@ -44,7 +44,7 @@ spec:
     # the same way the L7 Ingress node is tagged, so the narrow [tag:router ->
     # tag:media] ACL keeps working for the stream path too.
     - target:
-        group: "core"
+        group: "" # core resources use the empty API group, not "core"
         version: v1
         kind: Service
         labelSelector: hilmargustafs.com/media=true
