@@ -10,3 +10,14 @@
     name: config
     persistentVolumeClaim:
       claimName: transmission-config
+# Fixes "NEVER announced to tracker" / zero-peers on ALL downloads: the pod uses
+# ClusterFirst DNS with ndots:5, so a plain tracker hostname (2 dots) first churns
+# through the K8s + custom ".lan" search domains, which time out inside gluetun's
+# DNS. Absolute-first (ndots:1) resolves public tracker names directly. Verified:
+# getent plain-name fails 12/12 in the pod; absolute + direct-glue resolution work.
+- op: add
+  path: /spec/template/spec/dnsConfig
+  value:
+    options:
+      - name: ndots
+        value: "1"
