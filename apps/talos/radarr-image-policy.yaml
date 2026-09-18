@@ -9,4 +9,7 @@ spec:
     name: radarr
   policy:
     semver:
-      range: '>=5.0.0 <6.0.0'
+      # Widen to 6.x: qBittorrent 5.2.x (our download client) returns HTTP 204
+      # on /auth/login, which Radarr 5.x (<6.0.0) mis-handles as an auth failure
+      # (fix only exists in 6.x). Kept lower bound at 5.0.0; upper now <7.0.0.
+      range: '>=5.0.0 <7.0.0'
