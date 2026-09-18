@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: music-assistant
-          image: ghcr.io/music-assistant/server:2.10.3 # {"$imagepolicy": "flux-system:music-assistant"}
+          image: ghcr.io/music-assistant/server:2.10.4 # {"$imagepolicy": "flux-system:music-assistant"}
           imagePullPolicy: IfNotPresent
           args:
             - --data-dir=/data
