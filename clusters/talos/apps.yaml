@@ -39,3 +39,16 @@ spec:
         - op: replace
           path: /metadata/annotations/tailscale.com~1tags
           value: "tag:k8s,tag:internal,tag:media"
+    # MA L3 stream Service carries its own node (music-assistant-stream) that the
+    # router must peer to relay audio to the Cast speakers. Scope tag:media to it
+    # the same way the L7 Ingress node is tagged, so the narrow [tag:router ->
+    # tag:media] ACL keeps working for the stream path too.
+    - target:
+        group: "core"
+        version: v1
+        kind: Service
+        labelSelector: hilmargustafs.com/media=true
+      patch: |-
+        - op: add
+          path: /metadata/annotations/tailscale.com~1tags
+          value: "tag:k8s,tag:internal,tag:media"

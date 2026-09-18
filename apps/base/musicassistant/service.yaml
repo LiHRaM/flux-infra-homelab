@@ -3,6 +3,15 @@ kind: Service
 metadata:
   name: music-assistant
   namespace: smarthome
+  # L3 (raw TCP) exposure for the 8097 stream port, separate from the L7
+  # https Ingress (which only serves 443->8095 for the UI). Expose all
+  # service ports (8095/8097/8927) on a dedicated tailnet node so Cast
+  # speakers can fetch audio from music-assistant-stream.<tailnet>.ts.net:8097.
+  labels:
+    hilmargustafs.com/media: "true"
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: "music-assistant-stream"
 spec:
   ports:
     - name: http
