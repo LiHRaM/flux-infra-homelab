@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arr-stall-retry-script
+data:
+  arr_stall_retry.py: |
+    #!/usr/bin/env python3
+    """Blacklist-and-retry stalled *arr downloads across Radarr, Sonarr and Lidarr.
+
+    The *arrs already set autoRedownloadFailed=True, so marking a stalled grab as
+    FAILED (blacklist) triggers their native auto-redownload search. This finds
+    qBittorrent torrents that are stalled (dead magnet / no connections for a long
+    time) and, for each one tracked by an arr, deletes the matching arr queue entry
+    with `removeFromClientBody=true&blocklist=true`. That blacklists the dead release
+    and the arr's auto-redownload fires a fresh search for a better release.
+
+    Runs in-cluster (Flux CronJob). Endpoints + creds come from env:
+      QBITTORRENT_URL, RADARR_URL, SONARR_URL, LIDARR_URL  (in-cluster ClusterIP base URLs)
+      QBITTORRENT_PASSWORD, RADARR_API_KEY, SONARR_API_KEY, LIDARR_API_KEY
+      (RADARR_URL etc are the api root, e.g. http://radarr.arrs.svc.cluster.local:7878/api/v3)
+
+    Replaces the old desktop watchdog (qbittorrent_stall_watchdog.py) which only
+    paused music-category torrents and never touched Radarr/Sonarr or blacklisted.
+    """
+    import json
+    import os
+    import time
+    import urllib.parse
+    import urllib.request
+    import http.cookiejar
+
+    QB_BASE = os.environ["QBITTORRENT_URL"].rstrip("/")
+    STALL_MINUTES = int(os.environ.get("STALL_MINUTES", "20"))
+    MIN_RATE_BPS = int(os.environ.get("MIN_RATE_BPS", str(10 * 1024)))
+
+    ARRS = [
+        {"qcategory": "radarr",    "base": os.environ["RADARR_URL"].rstrip("/"), "key": os.environ["RADARR_API_KEY"]},
+        {"qcategory": "tv-sonarr", "base": os.environ["SONARR_URL"].rstrip("/"), "key": os.environ["SONARR_API_KEY"]},
+        {"qcategory": "music",     "base": os.environ["LIDARR_URL"].rstrip("/"), "key": os.environ["LIDARR_API_KEY"]},
+    ]
+
+
+    def qbit_opener():
+        cj = http.cookiejar.CookieJar()
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+        opener.addheaders = [("User-Agent", "arr-stall-retry")]
+        return opener
+
+
+    def qbit_api(opener, path, form=None):
+        url = QB_BASE + path
+        data = urllib.parse.urlencode(form or {}).encode() if form else None
+        req = urllib.request.Request(url, data=data)
+        with opener.open(req, timeout=30) as resp:
+            body = resp.read()
+        try:
+            return json.loads(body.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return None
+
+
+    def arr_api(base, key, path, method="GET"):
+        url = base + path
+        req = urllib.request.Request(url, method=method,
+                                     headers={"X-Api-Key": key})
+        with urllib.request.urlopen(req, timeout=40) as resp:
+            raw = resp.read()
+        if not raw:
+            return None
+        return json.loads(raw.decode("utf-8"))
+
+
+    def is_stalled(t, now):
+        state = t.get("state", "")
+        progress = t.get("progress") or 0
+        age_min = (now - (t.get("added_on") or 0)) / 60.0
+        if age_min < STALL_MINUTES:
+            return False
+        if progress >= 1.0:
+            return False  # finished / seeding
+        rate = t.get("dlspeed") or 0
+        peers = (t.get("num_seeds") or 0) + (t.get("num_leechs") or 0)
+        # Only retry when there are NO connections at all (dead swarm / dead magnet).
+        # A torrent with >=1 peer is alive even if slow -- don't churn it.
+        if peers == 0:
+            if state in ("metaDL", "stalledDL", "checkingDL"):
+                return True
+            if state in ("downloading", "pausedDL", "queuedDL") and rate < MIN_RATE_BPS:
+                return True
+        return False
+
+
+    def main():
+        opener = qbit_opener()
+        qbit_api(opener, "/api/v2/auth/login",
+                 form={"username": "admin", "password": os.environ["QBITTORRENT_PASSWORD"]})
+        now = time.time()
+        try:
+            torrents = qbit_api(opener, "/api/v2/torrents/info")
+        except Exception as exc:
+            print(f"arr-stall-retry: qbit info failed: {exc}")
+            return 1
+
+        stalled_by_cat = {}
+        for t in torrents:
+            if is_stalled(t, now):
+                stalled_by_cat.setdefault(t.get("category", ""), {})[t["hash"]] = t
+
+        total = 0
+        for arr in ARRS:
+            stalled = stalled_by_cat.get(arr["qcategory"], {})
+            if not stalled:
+                continue
+            queue = arr_api(arr["base"], arr["key"], "/queue?page=1&pageSize=100")
+            records = queue.get("records", []) if isinstance(queue, dict) else queue
+            for rec in records:
+                dl_id = (rec.get("downloadId") or "").lower()  # qbit hashes are lowercase
+                if dl_id not in stalled:
+                    continue
+                qitem = stalled[dl_id]
+                title = (rec.get("series") or rec.get("movie") or rec.get("artist") or {}).get("title") or rec.get("title") or qitem.get("name")
+                try:
+                    arr_api(arr["base"], arr["key"],
+                            f"/queue/{rec['id']}?removeFromClientBody=true&blocklist=true",
+                            method="DELETE")
+                    total += 1
+                    print(f"BLACKLISTED {arr['qcategory']} / {title} "
+                          f"(state={qitem.get('state')}, seeds={qitem.get('num_seeds')})")
+                except Exception as exc:
+                    print(f"arr-stall-retry: failed to blacklist {title}: {exc}")
+                try:
+                    qbit_api(opener, "/api/v2/torrents/delete",
+                             form={"hashes": dl_id, "deleteFiles": "false"})
+                except Exception:
+                    pass
+        if total:
+            print(f"arr-stall-retry: blacklisted {total} stalled torrent(s) across the arrs")
+        return 0
+
+
+    if __name__ == "__main__":
+        raise SystemExit(main())

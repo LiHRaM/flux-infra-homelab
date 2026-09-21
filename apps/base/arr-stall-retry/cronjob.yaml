@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.22.12/cronjob-batch-v1.json
+
+# Blacklists stalled *arr grabs in qBittorrent and lets the arrs auto-redownload a
+# better release. See script comment for behavior + the lowercase-hash matching trap.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: arr-stall-retry
+  labels:
+    app: arr-stall-retry
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: arr-stall-retry
+              image: python:3.12-slim
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-c", "python /app/arr_stall_retry.py"]
+              env:
+                # In-cluster (ClusterIP) endpoints; cross-namespace via svc FQDN.
+                - name: QBITTORRENT_URL
+                  value: "http://qbittorrent.qbittorrent.svc.cluster.local:8080"
+                - name: RADARR_URL
+                  value: "http://radarr.arrs.svc.cluster.local:7878/api/v3"
+                - name: SONARR_URL
+                  value: "http://sonarr.arrs.svc.cluster.local:8989/api/v3"
+                - name: LIDARR_URL
+                  value: "http://lidarr.arrs.svc.cluster.local:8686/api/v1"
+                - name: QBITTORRENT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: arr-stall-retry-secret
+                      key: QBITTORRENT_PASSWORD
+                - name: RADARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: arr-stall-retry-secret
+                      key: RADARR_API_KEY
+                - name: SONARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: arr-stall-retry-secret
+                      key: SONARR_API_KEY
+                - name: LIDARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: arr-stall-retry-secret
+                      key: LIDARR_API_KEY
+              resources:
+                limits:
+                  cpu: 250m
+                  memory: 256Mi
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+                  readOnly: true
+          volumes:
+            - name: script
+              configMap:
+                name: arr-stall-retry-script
+                defaultMode: 0555
