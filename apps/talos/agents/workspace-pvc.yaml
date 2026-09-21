@@ -1,0 +1,16 @@
+# Shared scratch/state volume for agentic workloads in the agents namespace.
+# ReadWriteOnce: longhorn-trusty attaches a volume to one node at a time, so
+# workloads sharing this claim must be scheduled onto the same node (or use
+# per-workload subPaths from one pod). Switch to ReadWriteMany only if
+# concurrent multi-node writers are actually needed.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: agent-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-trusty
+  resources:
+    requests:
+      storage: 5Gi

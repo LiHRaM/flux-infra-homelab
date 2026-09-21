@@ -1,0 +1,56 @@
+# ServiceAccount for agentic workloads that need to act on the cluster, e.g. an
+# in-cluster agent spawning a Job per task. Namespace-scoped on purpose: no
+# secret reads (pods consume the ollama-cloud Secret via valueFrom/secretKeyRef,
+# which the kubelet resolves without RBAC), no cross-namespace access.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agent
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: agent
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+      - pods/log
+      - configmaps
+      - events
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    verbs:
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: agent
+subjects:
+  - kind: ServiceAccount
+    name: agent
