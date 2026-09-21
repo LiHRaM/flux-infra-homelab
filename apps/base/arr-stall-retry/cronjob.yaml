@@ -11,8 +11,8 @@ metadata:
 spec:
   schedule: "*/15 * * * *"
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 2
-  failedJobsHistoryLimit: 2
+  successfulJobsHistoryLimit: 8
+  failedJobsHistoryLimit: 4
   jobTemplate:
     spec:
       backoffLimit: 1
@@ -54,6 +54,12 @@ spec:
                     secretKeyRef:
                       name: arr-stall-retry-secret
                       key: LIDARR_API_KEY
+                # Durable audit trail (survives job GC). Mounted from the
+                # arr-stall-retry-audit PVC (see talos overlay).
+                - name: AUDIT_LOG
+                  value: "/audit/arr-stall-retry.log"
+                - name: AUDIT_MAX_LINES
+                  value: "900"
               resources:
                 limits:
                   cpu: 250m
@@ -62,8 +68,13 @@ spec:
                 - name: script
                   mountPath: /app
                   readOnly: true
+                - name: audit
+                  mountPath: /audit
           volumes:
             - name: script
               configMap:
                 name: arr-stall-retry-script
                 defaultMode: 0555
+            - name: audit
+              persistentVolumeClaim:
+                claimName: arr-stall-retry-audit

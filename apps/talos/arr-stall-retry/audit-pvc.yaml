@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arr-stall-retry-audit
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-trusty
+  resources:
+    requests:
+      storage: 10Mi

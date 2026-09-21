@@ -17,21 +17,27 @@ data:
     Runs in-cluster (Flux CronJob). Endpoints + creds come from env:
       QBITTORRENT_URL, RADARR_URL, SONARR_URL, LIDARR_URL  (in-cluster ClusterIP base URLs)
       QBITTORRENT_PASSWORD, RADARR_API_KEY, SONARR_API_KEY, LIDARR_API_KEY
-      (RADARR_URL etc are the api root, e.g. http://radarr.arrs.svc.cluster.local:7878/api/v3)
 
-    Replaces the old desktop watchdog (qbittorrent_stall_watchdog.py) which only
-    paused music-category torrents and never touched Radarr/Sonarr or blacklisted.
+    Auditability: EVERY run (even a quiet one that retries nothing) appends one
+    timestamped line to the audit log at AUDIT_LOG (default /audit/arr-stall-retry.log,
+    mounted on a Longhorn PVC that survives job GC; the default is overridable via the
+    env AUDIT_LOG, e.g. to a no-write path). It also prints that line to stdout so a
+    scheduled run is visible in cron history too. The log is rotated in-place once it
+    exceeds AUDIT_MAX_LINES (default 900) lines, keeping the audit trail bounded.
     """
+    import datetime
+    import http.cookiejar
     import json
     import os
     import time
     import urllib.parse
     import urllib.request
-    import http.cookiejar
 
     QB_BASE = os.environ["QBITTORRENT_URL"].rstrip("/")
     STALL_MINUTES = int(os.environ.get("STALL_MINUTES", "20"))
     MIN_RATE_BPS = int(os.environ.get("MIN_RATE_BPS", str(10 * 1024)))
+    AUDIT_LOG = os.environ.get("AUDIT_LOG", "/audit/arr-stall-retry.log")
+    AUDIT_MAX_LINES = int(os.environ.get("AUDIT_MAX_LINES", "900"))
 
     ARRS = [
         {"qcategory": "radarr",    "base": os.environ["RADARR_URL"].rstrip("/"), "key": os.environ["RADARR_API_KEY"]},
@@ -90,15 +96,43 @@ data:
         return False
 
 
+    def audit(line):
+        """Append one audit line to the persistent log. Never fail the run on a write error."""
+        try:
+            os.makedirs(os.path.dirname(AUDIT_LOG), exist_ok=True)
+            with open(AUDIT_LOG, "a", encoding="utf-8") as f:
+                f.write(line + "\n")
+        except Exception as exc:
+            print(f"arr-stall-retry: audit append failed (continuing): {exc}")
+
+
+    def rotate():
+        """Trim the audit log in place once it exceeds AUDIT_MAX_LINES."""
+        try:
+            if not os.path.exists(AUDIT_LOG):
+                return
+            with open(AUDIT_LOG, encoding="utf-8") as f:
+                lines = f.read().splitlines()
+            if len(lines) <= AUDIT_MAX_LINES:
+                return
+            with open(AUDIT_LOG, "w", encoding="utf-8") as f:
+                f.write("\n".join(lines[-AUDIT_MAX_LINES:]) + "\n")
+        except Exception as exc:
+            print(f"arr-stall-retry: audit rotate failed (continuing): {exc}")
+
+
     def main():
         opener = qbit_opener()
         qbit_api(opener, "/api/v2/auth/login",
                  form={"username": "admin", "password": os.environ["QBITTORRENT_PASSWORD"]})
         now = time.time()
+        ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
             torrents = qbit_api(opener, "/api/v2/torrents/info")
         except Exception as exc:
-            print(f"arr-stall-retry: qbit info failed: {exc}")
+            line = f"{ts} sweep ERROR qbit_info_failed={exc}"
+            audit(line)
+            print(line)
             return 1
 
         stalled_by_cat = {}
@@ -107,6 +141,7 @@ data:
                 stalled_by_cat.setdefault(t.get("category", ""), {})[t["hash"]] = t
 
         total = 0
+        retried = []
         for arr in ARRS:
             stalled = stalled_by_cat.get(arr["qcategory"], {})
             if not stalled:
@@ -124,17 +159,16 @@ data:
                             f"/queue/{rec['id']}?removeFromClientBody=true&blocklist=true",
                             method="DELETE")
                     total += 1
-                    print(f"BLACKLISTED {arr['qcategory']} / {title} "
-                          f"(state={qitem.get('state')}, seeds={qitem.get('num_seeds')})")
+                    retried.append(f"{arr['qcategory']}:{title}")
                 except Exception as exc:
                     print(f"arr-stall-retry: failed to blacklist {title}: {exc}")
-                try:
-                    qbit_api(opener, "/api/v2/torrents/delete",
-                             form={"hashes": dl_id, "deleteFiles": "false"})
-                except Exception:
-                    pass
-        if total:
-            print(f"arr-stall-retry: blacklisted {total} stalled torrent(s) across the arrs")
+
+        rotate()
+        line = f"{ts} sweep torrents={len(torrents)} stalled_candidates={sum(len(v) for v in stalled_by_cat.values())} blacklisted={total}"
+        if retried:
+            line += " actions=[" + ", ".join(retried) + "]"
+        audit(line)
+        print(line)
         return 0
 
 
