@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.22.12/cronjob-batch-v1.json
+
+# Removes finished qBittorrent torrents whose media was CONFIRMED imported into an
+# *arr library. See script for the import-verification method (uppercase downloadId
+# history lookup). DRY-RUN by default (PRUNE=false) so the first deploy only reports.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: arr-seed-cleanup
+  labels:
+    app: arr-seed-cleanup
+spec:
+  schedule: "0 4 * * *"          # daily at 04:00
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 8
+  failedJobsHistoryLimit: 4
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: arr-seed-cleanup
+              image: python:3.12-slim
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-c", "python /app/arr_seed_cleanup.py"]
+              env:
+                # In-cluster (ClusterIP) endpoints; cross-namespace via svc FQDN.
+                - name: QBITTORRENT_URL
+                  value: "http://qbittorrent.qbittorrent.svc.cluster.local:8080"
+                - name: RADARR_URL
+                  value: "http://radarr.arrs.svc.cluster.local:7878/api/v3"
+                - name: SONARR_URL
+                  value: "http://sonarr.arrs.svc.cluster.local:8989/api/v3"
+                - name: LIDARR_URL
+                  value: "http://lidarr.arrs.svc.cluster.local:8686/api/v1"
+                - name: QBITTORRENT_PASSWORD
+                  valueFrom: {secretKeyRef: {name: arr-stall-retry-secret, key: QBITTORRENT_PASSWORD}}
+                - name: RADARR_API_KEY
+                  valueFrom: {secretKeyRef: {name: arr-stall-retry-secret, key: RADARR_API_KEY}}
+                - name: SONARR_API_KEY
+                  valueFrom: {secretKeyRef: {name: arr-stall-retry-secret, key: SONARR_API_KEY}}
+                - name: LIDARR_API_KEY
+                  valueFrom: {secretKeyRef: {name: arr-stall-retry-secret, key: LIDARR_API_KEY}}
+                # Dry-run until you flip this to "true" in the repo after a real review.
+                - name: PRUNE
+                  value: "false"
+                # Min share the torrent must have reached before cleanup is even considered.
+                - name: MIN_RATIO
+                  value: "0.0"
+                - name: MIN_SEED_MINUTES
+                  value: "10080"   # 7 days
+                # Durable audit trail (same PVC as stall retry, separate log).
+                - name: AUDIT_LOG
+                  value: "/audit/arr-seed-cleanup.log"
+                - name: AUDIT_MAX_LINES
+                  value: "900"
+              resources:
+                limits:
+                  cpu: 250m
+                  memory: 256Mi
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+                  readOnly: true
+                - name: audit
+                  mountPath: /audit
+          volumes:
+            - name: script
+              configMap:
+                name: arr-seed-cleanup-script
+                defaultMode: 0555
+            - name: audit
+              persistentVolumeClaim:
+                claimName: arr-stall-retry-audit

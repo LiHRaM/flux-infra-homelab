@@ -1,0 +1,190 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arr-seed-cleanup-script
+data:
+  arr_seed_cleanup.py: |
+    #!/usr/bin/env python3
+    """Remove finished qBittorrent torrents whose media was CONFIRMED imported.
+
+    qBt torrents sit at ratio 0.00 in stoppedUP/queuedUP after the *arrs import
+    their media (this client has no effective seeding cap), so completed torrents
+    accumulate forever. This sweeps them ONLY when we can PROVE the media made it
+    into the library: the *arr history carries a downloadFolderImported /
+    downloadImported / trackFileImported event whose downloadId matches the qBit
+    hash. That is the authoritative "this was imported" signal -- a torrent with NO
+    such event is left alone (it may still be the only copy).
+
+    CRITICAL CASE TRAP: *arr downloadId strings are UPPERCASE while qBt hashes are
+    lowercase. The history?downloadId= filter is case-sensitive and returns nothing
+    for a lowercase query -- ALWAYS query with the hash.upper(), and match events
+    against the lowercased value.
+
+    DRY-RUN by default: unless PRUNE=true, nothing is deleted -- every candidate is
+    reported to stdout + audit log so a human can review before enabling.
+
+    Endpoints + creds from env (in-cluster): QBITTORRENT_URL, RADARR_URL,
+    SONARR_URL, LIDARR_URL, QBITTORRENT_PASSWORD, *_API_KEY. Tuning: PRUNE,
+    MIN_RATIO (share ratio threshold), MIN_SEED_MINUTES (min time uploaded before
+    cleanup considered), AUDIT_LOG/AUDIT_MAX_LINES (bounded audit trail, PVC-backed).
+    """
+    import http.cookiejar
+    import json
+    import os
+    import time
+    import urllib.parse
+    import urllib.request
+    import datetime
+
+    QB_BASE = os.environ["QBITTORRENT_URL"].rstrip("/")
+    PRUNE = os.environ.get("PRUNE", "false").strip().lower() == "true"
+    MIN_RATIO = float(os.environ.get("MIN_RATIO", "0.0"))
+    MIN_SEED_MINUTES = int(os.environ.get("MIN_SEED_MINUTES", "10080"))  # 7d
+    AUDIT_LOG = os.environ.get("AUDIT_LOG", "/audit/arr-seed-cleanup.log")
+    AUDIT_MAX_LINES = int(os.environ.get("AUDIT_MAX_LINES", "900"))
+
+    # category -> (api base, api key, import event types that PROVE import)
+    IMPORT_EVENTS = {"downloadFolderImported", "downloadImported", "trackFileImported"}
+    ARRS = [
+        {"qcategory": "radarr",    "base": os.environ["RADARR_URL"].rstrip("/"), "key": os.environ["RADARR_API_KEY"], "events": {"downloadFolderImported"}},
+        {"qcategory": "tv-sonarr", "base": os.environ["SONARR_URL"].rstrip("/"), "key": os.environ["SONARR_API_KEY"], "events": {"downloadFolderImported"}},
+        {"qcategory": "music",     "base": os.environ["LIDARR_URL"].rstrip("/"), "key": os.environ["LIDARR_API_KEY"], "events": {"downloadImported", "trackFileImported"}},
+    ]
+
+
+    def qbit_login():
+        cj = http.cookiejar.CookieJar()
+        op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+        op.addheaders = [("User-Agent", "arr-seed-cleanup")]
+        data = urllib.parse.urlencode({"username": "admin", "password": os.environ["QBITTORRENT_PASSWORD"]}).encode()
+        req = urllib.request.Request(QB_BASE + "/api/v2/auth/login", data=data)
+        with op.open(req, timeout=30):
+            pass
+        return op
+
+
+    def qbit(op, path, form=None):
+        data = urllib.parse.urlencode(form).encode() if form else None
+        req = urllib.request.Request(QB_BASE + path, data=data)
+        with op.open(req, timeout=40) as resp:
+            body = resp.read()
+        try:
+            return json.loads(body.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return None
+
+
+    def arr_api(base, key, path):
+        req = urllib.request.Request(base + path, headers={"X-Api-Key": key})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+
+    def confirmed_imported(op, torrents_by_cat):
+        """Return set of lowercase qBit hashes that have a proving import event."""
+        confirmed = set()
+        for arr in ARRS:
+            for t in torrents_by_cat.get(arr["qcategory"], []):
+                h = t["hash"]
+                try:
+                    hist = arr_api(arr["base"], arr["key"],
+                                   f"/history?downloadId={h.upper()}&pageSize=50")
+                except Exception:
+                    continue
+                for rec in (hist.get("records") or []):
+                    if rec.get("eventType") in arr["events"]:
+                        confirmed.add(h.lower())
+                        break
+                time.sleep(0.05)
+        return confirmed
+
+
+    def main():
+        op = qbit_login()
+        now = time.time()
+        ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        try:
+            torrents = qbit(op, "/api/v2/torrents/info")
+        except Exception as exc:
+            line = f"{ts} sweep ERROR qbit_info_failed={exc}"
+            _audit(line, AUDIT_LOG, AUDIT_MAX_LINES)
+            print(line)
+            return 1
+
+        # group by qBit category
+        by_cat = {}
+        for t in torrents:
+            by_cat.setdefault(t.get("category", ""), []).append(t)
+
+        done = []
+        for cat, items in by_cat.items():
+            if cat not in ("radarr", "tv-sonarr", "music"):
+                continue
+            for t in items:
+                state = t["state"]
+                if not state.endswith("UP"):        # not finished (still downloading)
+                    continue
+                if t.get("ratio", 0) < MIN_RATIO:
+                    continue
+                seed_min = (now - (t.get("added_on") or 0)) / 60.0
+                if seed_min < MIN_SEED_MINUTES:
+                    continue
+                done.append((cat, t))
+
+        # PROVE import before any deletion
+        confirmed = confirmed_imported(op, by_cat)
+
+        candidates = []
+        for cat, t in done:
+            if t["hash"].lower() in confirmed:
+                candidates.append((cat, t))
+
+        removed = 0
+        mode = "PRUNE" if PRUNE else "DRY-RUN"
+        if candidates:
+            for cat, t in candidates:
+                action = "remove" if PRUNE else "would-remove"
+                print(f"[{mode}] {action} {cat}/{t['name']} ratio={t['ratio']:.2f} seedtime={(now-(t.get('added_on') or 0))/3600:.0f}h")
+                if PRUNE:
+                    try:
+                        qbit(op, "/api/v2/torrents/delete",
+                             form={"hashes": t["hash"], "deleteFiles": "true"})
+                        removed += 1
+                    except Exception as exc:
+                        print(f"[{mode}] delete FAILED {t['name']}: {exc}")
+
+        scanned = {c: len(v) for c, v in by_cat.items() if c in ("radarr", "tv-sonarr", "music")}
+        line = (f"{ts} sweep mode={mode} torrents={len(torrents)} "
+                f"confirmed_imported={len(confirmed)} finished_imported_candidates={len(candidates)} "
+                f"removed={removed} cats={json.dumps(scanned)}")
+        _audit(line, AUDIT_LOG, AUDIT_MAX_LINES)
+        print(line)
+        return 0
+
+
+    def _rotate(path, max_lines):
+        try:
+            if not os.path.exists(path):
+                return
+            with open(path, encoding="utf-8") as f:
+                lines = f.read().splitlines()
+            if len(lines) <= max_lines:
+                return
+            with open(path, "w", encoding="utf-8") as f:
+                f.write("\n".join(lines[-max_lines:]) + "\n")
+        except Exception as exc:
+            print(f"arr-seed-cleanup: audit rotate failed: {exc}")
+
+
+    def _audit(line, path, max_lines):
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(line + "\n")
+            _rotate(path, max_lines)
+        except Exception as exc:
+            print(f"arr-seed-cleanup: audit append failed: {exc}")
+
+
+    if __name__ == "__main__":
+        raise SystemExit(main())
