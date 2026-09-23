@@ -28,12 +28,3 @@
         href: https://ntfy.tyrannosaurus-turtle.ts.net
         description: "Notifications"
         icon: ntfy.png
-    - transmission:
-        href: https://transmission.tyrannosaurus-turtle.ts.net
-        description: "Downloads"
-        icon: transmission.png
-        widget:
-            type: transmission
-            url: http://transmission.transmission.svc.cluster.local:9091
-            username: ""
-            password: ""
