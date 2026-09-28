@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes
+  labels:
+    hilmargustafs.com/group: internal
+spec:
+  defaultBackend:
+    service:
+      name: hermes
+      port:
+        name: http
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - hermes

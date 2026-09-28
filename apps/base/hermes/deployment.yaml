@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.14.0/deployment-apps-v1.json
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes
+  labels:
+    app: hermes
+spec:
+  # Recreate, not RollingUpdate: the data volume is ReadWriteOnce, so a second
+  # pod would sit Pending forever waiting for Longhorn to detach the volume
+  # from the old one.
+  strategy:
+    type: Recreate
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: hermes
+  template:
+    metadata:
+      labels:
+        app: hermes
+    spec:
+      # No cluster API access needed: the runtime reads no Kubernetes objects.
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      # config.yaml is seeded on FIRST boot only, so the dashboard's Config page
+      # (PUT /api/config) stays authoritative and keeps writing into the PVC.
+      # Copying the ConfigMap on every start would silently revert dashboard
+      # edits, so the [ -f ] guard is load-bearing.
+      initContainers:
+        - name: seed-config
+          image: nousresearch/hermes-agent:v2026.9.24 # {"$imagepolicy": "flux-system:hermes"}
+          imagePullPolicy: IfNotPresent
+          # Run as the image's `hermes` user rather than root, so the seeded
+          # config.yaml is hermes-owned from creation and both the stage2 hook
+          # and the runtime can read AND rewrite it. Copying as root leaves a
+          # root-owned file that only a read-only stage2 chmod touches, which
+          # makes the dashboard's Config page unable to save. 10000 is the
+          # image's default hermes UID (we do not set HERMES_UID/PUID, which
+          # would remap it at boot).
+          securityContext:
+            runAsUser: 10000
+            runAsGroup: 10000
+          command:
+            - sh
+            - -c
+            - '[ -f /opt/data/config.yaml ] || cp /seed/config.yaml /opt/data/config.yaml'
+          volumeMounts:
+            - name: data
+              mountPath: /opt/data
+            - name: config-seed
+              mountPath: /seed
+              readOnly: true
+      containers:
+        - name: hermes
+          image: nousresearch/hermes-agent:v2026.9.24 # {"$imagepolicy": "flux-system:hermes"}
+          imagePullPolicy: IfNotPresent
+          # Dashboard/backend process only — the server the Desktop app's
+          # "Remote gateway" connection and the browser dashboard attach to.
+          # The messaging gateway (`gateway run`) is deliberately NOT started:
+          # with no platform tokens configured it would only add a second cron
+          # scheduler racing the one on the desktop, for no gain.
+          #
+          # Bind 0.0.0.0 because the Tailscale ingress proxy reaches the pod
+          # from the pod network, never over loopback; a non-loopback bind
+          # forces the dashboard auth gate on, which the credentials in the
+          # hermes-dashboard Secret satisfy.
+          args:
+            - dashboard
+            - --host
+            - 0.0.0.0
+            - --port
+            - "9119"
+            - --no-open
+            # The web UI is prebuilt in the image (HERMES_WEB_DIST) and the
+            # install tree under /opt/hermes is read-only, so never try to
+            # build it here.
+            - --skip-build
+          envFrom:
+            # HERMES_DASHBOARD_BASIC_AUTH_{USERNAME,PASSWORD,SECRET}
+            - secretRef:
+                name: hermes-dashboard
+            # OLLAMA_API_KEY
+            - secretRef:
+                name: ollama-cloud
+          env:
+            - name: HERMES_HOME
+              value: /opt/data
+          ports:
+            - name: http
+              containerPort: 9119
+              protocol: TCP
+          # /api/health is on the dashboard's public-path allowlist, so it
+          # answers without credentials and reflects real process liveness
+          # rather than the auth gate.
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          volumeMounts:
+            - name: data
+              mountPath: /opt/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hermes-data
+        - name: config-seed
+          configMap:
+            name: hermes-config

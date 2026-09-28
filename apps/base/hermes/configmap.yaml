@@ -1,0 +1,31 @@
+# Seeds $HERMES_HOME/config.yaml on FIRST boot only (see the initContainer in
+# the Deployment). Everything the cluster-side agent needs to be useful without
+# a human at a terminal: a working provider, a model, and the non-interactive
+# guardrails that fit an unattended box.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-config
+data:
+  config.yaml: |
+    # Ollama Cloud, credentialed by OLLAMA_API_KEY from the ollama-cloud Secret
+    # (same key the in-cluster agent jobs use). Change model/provider freely
+    # from the dashboard's Config page — that writes to the PVC copy, which is
+    # the authoritative one after first boot.
+    model:
+      provider: ollama-cloud
+      default: deepseek-v4.1-flash
+      base_url: https://ollama.com/v1
+      api_mode: chat_completions
+      max_tokens: 32768
+
+    # Unattended sessions get tool-loop hard stops by default; this box has no
+    # interactive fallback, so a runaway loop must end by itself.
+    tool_loop_guardrails:
+      non_interactive_hard_stop_enabled: true
+
+    # The dashboard/backend drives every turn; nothing here needs the messaging
+    # gateway, so no platform is enabled.
+    agent:
+      gateway_timeout: 1800
+      max_turns: 200

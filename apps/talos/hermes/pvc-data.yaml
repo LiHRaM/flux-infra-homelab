@@ -1,0 +1,15 @@
+# All Hermes state for the cluster-side instance: config.yaml, .env, sessions,
+# memory, skills, cron jobs, logs. ReadWriteOnce because Longhorn attaches a
+# volume to one node at a time and the Deployment is single-replica Recreate.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-data
+  namespace: agents
+spec:
+  storageClassName: longhorn-trusty
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

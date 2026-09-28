@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes
+spec:
+  type: ClusterIP
+  selector:
+    app: hermes
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9119
+      targetPort: http
