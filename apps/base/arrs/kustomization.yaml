@@ -52,3 +52,18 @@ patches:
         value:
           cpu: 100m
           memory: 128Mi
+  # Lidarr OOMKilled at 300Mi while scanning the music library (large
+  # MusicBrainz metadata + disk scans), which silently aborted rescans and
+  # imports. 1500Mi matches the headroom radarr-style libraries need.
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: lidarr
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 1500Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 1000m
