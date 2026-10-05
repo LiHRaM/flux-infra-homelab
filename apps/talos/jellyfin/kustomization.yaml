@@ -8,6 +8,7 @@ resources:
 - pvc-media.yaml
 - ../../base/jellyfin
 - ../../configMaps/linuxserver
+- ../../configMaps/jellyfin
 
 patches:
 - path: deployment-patch.yaml

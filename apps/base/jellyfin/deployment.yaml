@@ -17,6 +17,33 @@ spec:
       labels:
         app: jellyfin
     spec:
+      # Jellyfin's named configuration (encoding.xml / system.xml) is loaded only
+      # via XmlSerializer.DeserializeFromFile -- the JELLYFIN_* env vars feed
+      # ASP.NET host configuration, not IConfigurationManager, so transcoding
+      # settings cannot be set by env var. Apply them to /config before the
+      # server starts instead. Idempotent: rewriting the same values is a no-op
+      # on every subsequent restart.
+      initContainers:
+        - name: apply-encoding-config
+          image: busybox:1.37.0
+          command: ["/bin/sh", "/scripts/patch-system-xml.sh"]
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 32Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: encoding-src
+              mountPath: /encoding-src
+            - name: encoding-script
+              mountPath: /scripts
       containers:
         - name: jellyfin
           image: ghcr.io/linuxserver/jellyfin:10.11.11 # {"$imagepolicy": "flux-system:jellyfin"}
@@ -47,3 +74,29 @@ spec:
             - configMapRef:
                 name: linuxserver-common
                 optional: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /data
+              name: media
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+        # Source of truth for encoding.xml; defaultMode 0444.
+        - name: encoding-src
+          configMap:
+            name: jellyfin-encoding-config
+            items:
+              - key: encoding.xml
+                path: encoding.xml
+        - name: encoding-script
+          configMap:
+            name: jellyfin-encoding-config
+            items:
+              - key: patch-system-xml.sh
+                path: patch-system-xml.sh
+            defaultMode: 0555

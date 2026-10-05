@@ -1,0 +1,119 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jellyfin-encoding-config
+  namespace: flux-system
+data:
+  # Applied over /config/encoding.xml at pod start by the initContainer in
+  # apps/base/jellyfin/deployment.yaml.
+  #
+  # Why this file exists: Jellyfin loads its named configuration (encoding.xml,
+  # system.xml) ONLY through XmlSerializer.DeserializeFromFile in
+  # BaseConfigurationManager.LoadConfiguration. The JELLYFIN_* environment
+  # variables are consumed by ASP.NET's ConfigureAppConfiguration, which feeds
+  # the HOST configuration, not IConfigurationManager -- so transcoding settings
+  # cannot be set by env var. Injecting the file is the only declarative path.
+  #
+  # Why vaapi: without it Jellyfin software-encodes with libx264, which is both
+  # slower and much heavier per transcode. Measured in-pod on identical 1080p AV1
+  # content: libx264 peak RSS 377 MiB vs h264_vaapi 100 MiB; at 4K the gap widens
+  # (2236 MiB vs 264 MiB). The iGPU is a Haswell-era part exposing H264
+  # encode/decode only (vainfo: VAProfileH264High VLD/EncSlice), which is why
+  # AllowHevcEncoding stays false.
+  encoding.xml: |
+    <?xml version="1.0" encoding="utf-8"?>
+    <EncodingOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <EncodingThreadCount>-1</EncodingThreadCount>
+      <TranscodingTempPath>/config/cache/transcodes</TranscodingTempPath>
+      <FallbackFontPath />
+      <EnableFallbackFont>false</EnableFallbackFont>
+      <EnableAudioVbr>false</EnableAudioVbr>
+      <DownMixAudioBoost>2</DownMixAudioBoost>
+      <DownMixStereoAlgorithm>None</DownMixStereoAlgorithm>
+      <MaxMuxingQueueSize>2048</MaxMuxingQueueSize>
+      <EnableThrottling>true</EnableThrottling>
+      <ThrottleDelaySeconds>180</ThrottleDelaySeconds>
+      <EnableSegmentDeletion>false</EnableSegmentDeletion>
+      <SegmentKeepSeconds>720</SegmentKeepSeconds>
+      <HardwareAccelerationType>vaapi</HardwareAccelerationType>
+      <EncoderAppPathDisplay>/usr/lib/jellyfin-ffmpeg/ffmpeg</EncoderAppPathDisplay>
+      <VaapiDevice>/dev/dri/renderD128</VaapiDevice>
+      <QsvDevice />
+      <EnableTonemapping>false</EnableTonemapping>
+      <EnableVppTonemapping>false</EnableVppTonemapping>
+      <EnableVideoToolboxTonemapping>false</EnableVideoToolboxTonemapping>
+      <TonemappingAlgorithm>bt2390</TonemappingAlgorithm>
+      <TonemappingMode>auto</TonemappingMode>
+      <TonemappingRange>auto</TonemappingRange>
+      <TonemappingDesat>0</TonemappingDesat>
+      <TonemappingPeak>100</TonemappingPeak>
+      <TonemappingParam>0</TonemappingParam>
+      <VppTonemappingBrightness>16</VppTonemappingBrightness>
+      <VppTonemappingContrast>1</VppTonemappingContrast>
+      <H264Crf>23</H264Crf>
+      <H265Crf>28</H265Crf>
+      <EncoderPreset>auto</EncoderPreset>
+      <DeinterlaceDoubleRate>false</DeinterlaceDoubleRate>
+      <DeinterlaceMethod>yadif</DeinterlaceMethod>
+      <EnableDecodingColorDepth10Hevc>false</EnableDecodingColorDepth10Hevc>
+      <EnableDecodingColorDepth10Vp9>false</EnableDecodingColorDepth10Vp9>
+      <EnableDecodingColorDepth10HevcRext>false</EnableDecodingColorDepth10HevcRext>
+      <EnableDecodingColorDepth12HevcRext>false</EnableDecodingColorDepth12HevcRext>
+      <EnableEnhancedNvdecDecoder>true</EnableEnhancedNvdecDecoder>
+      <PreferSystemNativeHwDecoder>true</PreferSystemNativeHwDecoder>
+      <EnableIntelLowPowerH264HwEncoder>false</EnableIntelLowPowerH264HwEncoder>
+      <EnableIntelLowPowerHevcHwEncoder>false</EnableIntelLowPowerHevcHwEncoder>
+      <EnableHardwareEncoding>true</EnableHardwareEncoding>
+      <AllowHevcEncoding>false</AllowHevcEncoding>
+      <AllowAv1Encoding>false</AllowAv1Encoding>
+      <EnableSubtitleExtraction>true</EnableSubtitleExtraction>
+      <HardwareDecodingCodecs>
+        <string>h264</string>
+        <string>mpeg2video</string>
+      </HardwareDecodingCodecs>
+      <AllowOnDemandMetadataBasedKeyframeExtractionForExtensions>
+        <string>mkv</string>
+      </AllowOnDemandMetadataBasedKeyframeExtractionForExtensions>
+    </EncodingOptions>
+
+  # Applied over /config/system.xml by patch-system-xml.sh below.
+  #
+  # NOTE on what is deliberately NOT changed: LibraryScanFanoutConcurrency=1 is
+  # NOT a cap reduction. Per v10.11.11 LimitedConcurrencyLibraryScheduler:
+  #   ShouldForceSequentialOperation:
+  #     fanoutSetting == 1 || (fanoutSetting <= 0 && Environment.ProcessorCount <= 3)
+  # The pod's CPU limit is 2 cores so ProcessorCount is 2, meaning the unset
+  # value (0) ALREADY resolves to sequential. Pinning it to 1 just makes that
+  # independent of the CPU limit, so it cannot silently fan out if the limit is
+  # raised later. Setting it to 2 would have INCREASED concurrency.
+  #
+  # ParallelImageEncodingLimit=2 also matches what unset already resolves to
+  # (ImageProcessor and MediaEncoder both fall back to Environment.ProcessorCount);
+  # pinning it just stops it drifting with the CPU limit.
+  #
+  # LibraryMetadataRefreshConcurrency is NOT set on purpose -- nothing in
+  # v10.11.11 reads it (grep finds only the property declaration), so setting it
+  # would be dead config that looks load-bearing.
+  patch-system-xml.sh: |
+    #!/bin/sh
+    # Both target elements already exist in any Jellyfin-written system.xml, so
+    # an in-place sed is safe. Fail loudly rather than guessing if they don't.
+    set -eu
+    F=/config/system.xml
+    [ -f "$F" ] || { echo "ERROR: $F missing" >&2; exit 1; }
+
+    set_tag() {
+      tag="$1"; want="$2"
+      if ! grep -q "<${tag}>" "$F"; then
+        echo "ERROR: <${tag}> not present in $F -- refusing to guess" >&2
+        exit 1
+      fi
+      sed -i "s|<${tag}>[^<]*</${tag}>|<${tag}>${want}</${tag}>|" "$F"
+      got=$(sed -n "s|.*<${tag}>\([^<]*\)</${tag}>.*|\1|p" "$F" | head -1)
+      [ "$got" = "$want" ] || { echo "ERROR: ${tag} is '${got}', expected '${want}'" >&2; exit 1; }
+      echo "patched ${tag}=${got}"
+    }
+
+    set_tag LibraryScanFanoutConcurrency 1
+    set_tag ParallelImageEncodingLimit 2
