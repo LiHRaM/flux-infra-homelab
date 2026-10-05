@@ -54,7 +54,17 @@ spec:
               memory: 1Gi
             limits:
               cpu: 2000m
-              memory: 5Gi
+              # Sized from measurement, not guesswork. With VAAPI transcoding
+              # (see apps/configMaps/jellyfin) the pod's worst observed working
+              # set is ~1.2 GiB: 5 concurrent h264_vaapi transcodes (94 MiB each)
+              # plus three scoped library scans, sampled at 2 Hz -- mean 1.05 GiB,
+              # peak 1.21 GiB, of which only ~0.5 GiB was unreclaimable anon and
+              # the rest reclaimable page cache and transcode tmpfs. 2 GiB leaves
+              # ~65% headroom over that synthetic extreme while returning 3 GiB
+              # to the node. Before the VAAPI change the same pod carried a
+              # 2.96 GiB lifetime high-water mark, which is why 2 GiB was not
+              # previously safe. Revisit after a week of real usage.
+              memory: 2Gi
           ports:
             - containerPort: 8096
               protocol: TCP
