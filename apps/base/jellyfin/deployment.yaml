@@ -56,15 +56,26 @@ spec:
               cpu: 2000m
               # Sized from measurement, not guesswork. With VAAPI transcoding
               # (see apps/configMaps/jellyfin) the pod's worst observed working
-              # set is ~1.2 GiB: 5 concurrent h264_vaapi transcodes (94 MiB each)
-              # plus three scoped library scans, sampled at 2 Hz -- mean 1.05 GiB,
-              # peak 1.21 GiB, of which only ~0.5 GiB was unreclaimable anon and
-              # the rest reclaimable page cache and transcode tmpfs. 2 GiB leaves
-              # ~65% headroom over that synthetic extreme while returning 3 GiB
-              # to the node. Before the VAAPI change the same pod carried a
-              # 2.96 GiB lifetime high-water mark, which is why 2 GiB was not
-              # previously safe. Revisit after a week of real usage.
-              memory: 2Gi
+              # set from synthetic load is ~1.2 GiB: 5 concurrent h264_vaapi
+              # transcodes (94 MiB each) plus three scoped library scans.
+              #
+              # That was NOT the real worst case. 24h at 2 GiB showed the ceiling
+              # reached exactly twice (memory.events: max 2, oom_kill 0), caused
+              # not by viewers but by Jellyfin's own deterministic nightly
+              # maintenance -- Extract Chapter Images (00:00Z), Generate Trickplay
+              # Images (01:00Z), Media Segment Scan (01:38Z), Scan Media Library
+              # (01:39Z). That cycle recurs every night regardless of usage, and
+              # the synthetic test never included it. No harm resulted (the kernel
+              # reclaimed page cache rather than killing the pod) but it cost real
+              # churn: pgscan/pgsteal ~1.24M, workingset_refault_file ~126k.
+              #
+              # 3 GiB clears that nightly peak while still sitting ~2.6 GiB below
+              # the 5 GiB this pod needed before VAAPI transcoding (its lifetime
+              # high-water mark was 2.96 GiB while software encoding with libx264).
+              # Note only the 1Gi request is actually withheld from the scheduler;
+              # this limit is a ceiling, so the extra GiB costs the node nothing
+              # until it is genuinely needed.
+              memory: 3Gi
           ports:
             - containerPort: 8096
               protocol: TCP
