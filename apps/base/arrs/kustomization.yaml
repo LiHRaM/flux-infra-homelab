@@ -26,6 +26,18 @@ patches:
           limits:
             cpu: 200m
             memory: 300Mi
+  # Bazarr is the tightest limit in the stack and the only pod that has actually
+  # died: at 400Mi it OOMKilled on 2026-09-20 while hammering failing subtitle
+  # providers (podnapisi NameResolutionError, tvsubtitles 403, opensubtitlescom 426),
+  # and it stayed terminated for 19 days rather than restarting -- the container had
+  # no restartPolicy of its own, so the pod sat Running-with-dead-container and
+  # served 502.
+  #
+  # Raised to 1Gi from 400Mi. There is no measurement to size from -- the killed
+  # container cannot be exec'd into, so its real peak is unrecorded. 1Gi was chosen
+  # as a safe step (2.5x the old cap, still small next to jellyfin's 2Gi) and MUST be
+  # re-checked against the live pod's /sys/fs/cgroup/memory.peak after it has been up
+  # for a while; tighten it then if the peak is comfortably lower.
   - target:
       group: apps
       version: v1
@@ -34,4 +46,9 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
-        value: 400Mi
+        value: 1Gi
+      - op: add
+        path: /spec/template/spec/containers/0/resources/requests
+        value:
+          cpu: 100m
+          memory: 128Mi
