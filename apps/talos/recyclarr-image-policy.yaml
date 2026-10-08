@@ -9,6 +9,7 @@ spec:
     name: recyclarr
   policy:
     semver:
-      # Stay on 7.x. v8 removed `replace_existing_custom_formats`, which this
-      # cache-less CronJob relies on to re-adopt its custom formats each run.
-      range: '>=7.5.2 <8.0.0'
+      # v8 migration (2026-10-08): the config is now guide-backed, which does
+      # not need `replace_existing_custom_formats` (removed in v8). The old 7.x
+      # cap existed only to avoid that migration; it is no longer needed.
+      range: '>=8.0.0 <9.0.0'

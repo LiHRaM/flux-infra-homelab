@@ -1,4 +1,12 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/v8/config-schema.json
+#
+# Recyclarr v8 config (migrated from the v7 include-template form, 2026-10-08).
+#
+# v8 removed every official include template and replaced them with
+# guide-backed quality profiles + custom-format groups. The `include:` block is
+# gone; `replace_existing_custom_formats` is gone (v8 adopts existing custom
+# formats by name automatically). Upstream `config-templates` master is the v8
+# form (there is no `v8` branch and no v7 branch: v7 lived on `master`).
 
 sonarr:
 
@@ -7,12 +15,18 @@ sonarr:
     api_key: !secret sonarr_apikey
 
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
 
-    include:
-      - template: sonarr-quality-definition-series
-      # 720p + 1080p (WEB / Bluray / HDTV). Profile is still named "WEB-1080p".
-      - template: sonarr-v4-quality-profile-web-1080p-alternative
+    # Guide-backed profile: pulls qualities, score set and CF scores from the
+    # TRaSH Guides ("WEB-1080p (Alternative)" = 720p + 1080p, WEB/Bluray/HDTV,
+    # no Remux).
+    # `name` is kept ONLY so the first sync ADOPTS the existing "WEB-1080p"
+    # profile instead of creating a duplicate. After adoption it can be removed
+    # to take the guide name "WEB-1080p (Alternative)".
+    quality_profiles:
+      - trash_id: 9d142234e45d6143785ac55f5a9e8dc9  # WEB-1080p (Alternative)
+        name: WEB-1080p
+        reset_unmatched_scores:
+          enabled: true
 
     # Sizes are MB per minute of runtime, so per-episode totals scale with
     # episode length. At 45 min: preferred ~0.8 GB, max ~2.0 GB; at 60 min:
@@ -53,16 +67,17 @@ sonarr:
           preferred: 12
           max: 35
 
-    custom_formats:
-      # Optional
-      - trash_ids:
-          - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
-          - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
-          - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
-          - 06d66ab109d4d2eddb2794d21526d140 # Retags
-          - 1b3994c551cbb92a2c781af061f4ab44 # Scene
-        assign_scores_to:
-          - name: WEB-1080p
+    # Default guide CF groups sync automatically with a guide-backed profile.
+    # This block only restores the opt-in [Unwanted] formats that the v7 config
+    # scored explicitly. Bad Dual Groups is default-included already.
+    custom_format_groups:
+      add:
+        - trash_id: 59c3af66780d08332fdc64e68297098f  # [Unwanted] Unwanted Formats
+          select:
+            - 82d40da2bc6923f41e14394075dd4b03  # No-RlsGroup
+            - e1a997ddb54e3ecbfe06341ad323c458  # Obfuscated
+            - 06d66ab109d4d2eddb2794d21526d140  # Retags
+            - 1b3994c551cbb92a2c781af061f4ab44  # Scene
 
 radarr:
   main:
@@ -70,14 +85,14 @@ radarr:
     api_key: !secret radarr_apikey
 
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
 
-    include:
-      # Comment out any of the following includes to disable them
-      - template: radarr-quality-definition-movie
-      # Bluray-1080p + WEB 1080p + Bluray-720p. No Remux (Remux = 30-60 GB).
-      - template: radarr-quality-profile-hd-bluray-web
-      - template: radarr-custom-formats-hd-bluray-web
+    # Guide-backed profile: TRaSH "HD Bluray + WEB" (Bluray-1080p + WEB 1080p +
+    # Bluray-720p; no Remux/2160p). `name` kept for the adopting first sync.
+    quality_profiles:
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9  # HD Bluray + WEB
+        name: HD Bluray + WEB
+        reset_unmatched_scores:
+          enabled: true
 
     # Sizes are MB per minute of runtime, so totals scale with film length.
     # At 115 min: preferred ~1.5 GB, max ~3.45 GB; at 90 min: preferred ~1.2 GB,
@@ -102,21 +117,17 @@ radarr:
           preferred: 10
           max: 25
 
-    custom_formats:
-      # Optional
-      - trash_ids:
-          - b6832f586342ef70d9c128d40c07b872 # Bad Dual Groups
-          - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5 # No-RlsGroup
-          - 7357cf5161efbf8c4d5d0c30b4815ee2 # Obfuscated
-          - 5c44f52a8714fdd79bb4d98e2673be1f # Retags
-          - f537cf427b64c38c8e36298f657e4828 # Scene
-        assign_scores_to:
-          - name: HD Bluray + WEB
-
-      # Allow x265 (HD): the hd-bluray-web template scores it negative, which
-      # blocks it. Override to 0 so the smaller HEVC files are accepted.
-      - trash_ids:
-          - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
-        assign_scores_to:
-          - name: HD Bluray + WEB
-            score: 0
+    # Default guide CF groups sync automatically. This block only preserves the
+    # v7 customisations: allow x265 (HD) HEVC instead of blocking it, and keep
+    # the opt-in [Unwanted] formats the v7 config scored explicitly.
+    custom_format_groups:
+      add:
+        - trash_id: f8bf8eab4617f12dfdbd16303d8da245  # [Optional] Golden Rule HD
+          exclude:
+            - dc98083864ea246d05a42df0d05f81cc  # x265 (HD)
+        - trash_id: a3ac6af01d78e4f21fcb75f601ac96df  # [Unwanted] Unwanted Formats
+          select:
+            - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5  # No-RlsGroup
+            - 7357cf5161efbf8c4d5d0c30b4815ee2  # Obfuscated
+            - 5c44f52a8714fdd79bb4d98e2673be1f  # Retags
+            - f537cf427b64c38c8e36298f657e4828  # Scene
