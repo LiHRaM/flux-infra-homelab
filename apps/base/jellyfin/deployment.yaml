@@ -88,9 +88,16 @@ spec:
             httpGet:
               path: /health
               port: http
-            failureThreshold: 3
-            initialDelaySeconds: 15
-            periodSeconds: 30
+            failureThreshold: 5
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            # /health is served by the same thread pool that runs library scans.
+            # With the 1s default (no timeoutSeconds) a full music-library rescan
+            # makes it miss the deadline, the kubelet kills a healthy-but-busy
+            # server, and it restarts straight back into the same scan -- a crash
+            # loop that never converges. 10s tolerates the scan and still catches
+            # a genuinely wedged process.
+            timeoutSeconds: 10
           envFrom:
             - configMapRef:
                 name: linuxserver-common
