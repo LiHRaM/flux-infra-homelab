@@ -1,0 +1,60 @@
+# Flux failure alerting -> ntfy.
+#
+# Flux has no native `ntfy` provider, so it is a `generic` webhook POSTing the
+# Flux Event JSON to an ntfy topic URL. The topic segment is the secret (ntfy
+# here runs unauthenticated and is only reachable over the tailnet), so the
+# address lives in a Secret rather than in git.
+#
+# The alert surfaces reconciliation failures only (eventSeverity: error). This
+# exists because the recyclarr sync failed silently for ~2 months: nothing
+# reports a broken CronJob to the user.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ntfy-flux-alert
+  namespace: flux-system
+type: Opaque
+stringData:
+  # In-cluster Service DNS on purpose: *.ts.net names are unreliable from pods
+  # on this cluster (MagicDNS), whereas the ClusterIP Service always resolves.
+  address: http://ntfy-svc.ntfy.svc.cluster.local/flux-alerts
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: ntfy
+  namespace: flux-system
+spec:
+  type: generic
+  address: http://ntfy-svc.ntfy.svc.cluster.local/flux-alerts
+  secretRef:
+    name: ntfy-flux-alert
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-errors
+  namespace: flux-system
+spec:
+  providerRef:
+    name: ntfy
+  # Only failures; info events (every successful reconcile) would spam.
+  eventSeverity: error
+  eventMetadata:
+    summary: Homelab cluster reconciliation failed
+    cluster: talos-homelab
+  eventSources:
+    - kind: GitRepository
+      name: '*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: '*'
+      namespace: flux-system
+    # HelmReleases live in BOTH flux-system and longhorn-system here.
+    - kind: HelmRelease
+      name: '*'
+      namespace: flux-system
+    - kind: HelmRelease
+      name: '*'
+      namespace: longhorn-system
