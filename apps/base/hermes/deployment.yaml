@@ -24,6 +24,18 @@ spec:
       # No cluster API access needed: the runtime reads no Kubernetes objects.
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
+      # Longhorn hands a fresh volume to the pod owned by root:root 0755, so a
+      # container running as the image's uid 10000 cannot write to /opt/data at
+      # all - the seed initContainer died with "cp: cannot create regular file
+      # '/opt/data/config.yaml': Permission denied" and the pod never left
+      # Init:CrashLoopBackOff. fsGroup makes the kubelet chown the mount to gid
+      # 10000 (the driver supports it: CSIDriver fsGroupPolicy is
+      # ReadWriteOnceWithFSType), which also gives the runtime a writable
+      # HERMES_HOME for sessions, memory, skills and cron. OnRootMismatch keeps
+      # the chown off the hot path on every restart.
+      securityContext:
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
       # config.yaml is seeded on FIRST boot only, so the dashboard's Config page
       # (PUT /api/config) stays authoritative and keeps writing into the PVC.
       # Copying the ConfigMap on every start would silently revert dashboard
