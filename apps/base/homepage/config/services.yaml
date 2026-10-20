@@ -25,7 +25,7 @@
         siteMonitor: https://sonarr.tyrannosaurus-turtle.ts.net
         widget:
             type: sonarr
-            url: http://sonarr.arrs.svc.cluster.local
+            url: http://sonarr.arrs.svc.cluster.local:8989
             key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
     - radarr:
         href: https://radarr.tyrannosaurus-turtle.ts.net
@@ -34,7 +34,7 @@
         siteMonitor: https://radarr.tyrannosaurus-turtle.ts.net
         widget:
             type: radarr
-            url: http://radarr.arrs.svc.cluster.local
+            url: http://radarr.arrs.svc.cluster.local:7878
             key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
     - prowlarr:
         href: https://prowlarr.tyrannosaurus-turtle.ts.net
@@ -43,7 +43,7 @@
         siteMonitor: https://prowlarr.tyrannosaurus-turtle.ts.net
         widget:
             type: prowlarr
-            url: http://prowlarr.arrs.svc.cluster.local
+            url: http://prowlarr.arrs.svc.cluster.local:9696
             key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
     - lidarr:
         href: https://lidarr.tyrannosaurus-turtle.ts.net
@@ -52,7 +52,7 @@
         siteMonitor: https://lidarr.tyrannosaurus-turtle.ts.net
         widget:
             type: lidarr
-            url: http://lidarr.arrs.svc.cluster.local
+            url: http://lidarr.arrs.svc.cluster.local:8686
             key: "{{HOMEPAGE_VAR_LIDARR_API_KEY}}"
 - Downloads:
     - qbittorrent:
@@ -86,10 +86,11 @@
         description: "Notifications"
         icon: ntfy.png
         siteMonitor: https://ntfy.tyrannosaurus-turtle.ts.net
-        widget:
-            type: ntfy
-            url: http://ntfy-svc.ntfy.svc.cluster.local
-            topic: flux-alerts
+        # NOTE: no ntfy widget. homepage v2.6.0 hardcodes the endpoint
+        # "{topic}/json?poll=1&since=latest", but ntfy 1.28 rejects
+        # since=latest with HTTP 400 (it only accepts a duration like 1h).
+        # The endpoint is not configurable, so the widget cannot work here
+        # until upstream fixes it. Kept as a plain link for now.
     - longhorn:
         href: https://longhorn.tyrannosaurus-turtle.ts.net
         description: "Block storage"
