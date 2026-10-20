@@ -1,30 +1,102 @@
-- Movies & TV:
+- Media:
     - jellyfin:
         href: https://jellyfin.tyrannosaurus-turtle.ts.net
         description: "Stream media"
         icon: jellyfin.png
+        siteMonitor: https://jellyfin.tyrannosaurus-turtle.ts.net
+        widget:
+            type: jellyfin
+            url: http://jellyfin.saga.svc.cluster.local
+            key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
+            version: 1
     - bazarr:
         href: https://bazarr.tyrannosaurus-turtle.ts.net
         description: "Manage subtitles"
         icon: bazarr.png
-- Shared:
+        siteMonitor: https://bazarr.tyrannosaurus-turtle.ts.net
+        widget:
+            type: bazarr
+            url: http://bazarr.arrs.svc.cluster.local:6767
+            key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
     - sonarr:
         href: https://sonarr.tyrannosaurus-turtle.ts.net
         description: "Manage series"
         icon: sonarr.png
+        siteMonitor: https://sonarr.tyrannosaurus-turtle.ts.net
+        widget:
+            type: sonarr
+            url: http://sonarr.arrs.svc.cluster.local
+            key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
     - radarr:
         href: https://radarr.tyrannosaurus-turtle.ts.net
         description: "Manage movies"
         icon: radarr.png
+        siteMonitor: https://radarr.tyrannosaurus-turtle.ts.net
+        widget:
+            type: radarr
+            url: http://radarr.arrs.svc.cluster.local
+            key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
     - prowlarr:
         href: https://prowlarr.tyrannosaurus-turtle.ts.net
         description: "Manage indexers"
         icon: prowlarr.png
+        siteMonitor: https://prowlarr.tyrannosaurus-turtle.ts.net
+        widget:
+            type: prowlarr
+            url: http://prowlarr.arrs.svc.cluster.local
+            key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
     - lidarr:
         href: https://lidarr.tyrannosaurus-turtle.ts.net
         description: "Manage music"
         icon: lidarr.png
+        siteMonitor: https://lidarr.tyrannosaurus-turtle.ts.net
+        widget:
+            type: lidarr
+            url: http://lidarr.arrs.svc.cluster.local
+            key: "{{HOMEPAGE_VAR_LIDARR_API_KEY}}"
+- Downloads:
+    - qbittorrent:
+        href: https://qbittorrent.tyrannosaurus-turtle.ts.net
+        description: "Download client"
+        icon: qbittorrent.png
+        siteMonitor: https://qbittorrent.tyrannosaurus-turtle.ts.net
+        widget:
+            type: qbittorrent
+            url: http://qbittorrent.qbittorrent.svc.cluster.local:8080
+            username: "admin"
+            password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
+- Smart Home:
+    - home-assistant:
+        href: https://home-assistant.tyrannosaurus-turtle.ts.net
+        description: "Home automation"
+        icon: home-assistant.png
+        siteMonitor: https://home-assistant.tyrannosaurus-turtle.ts.net
+        widget:
+            type: homeassistant
+            url: http://home-assistant.smarthome.svc.cluster.local:8123
+            key: "{{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}"
+    - music-assistant:
+        href: https://music-assistant.tyrannosaurus-turtle.ts.net
+        description: "Multi-room audio"
+        icon: music-assistant.png
+        siteMonitor: https://music-assistant.tyrannosaurus-turtle.ts.net
+- Infrastructure:
     - ntfy:
         href: https://ntfy.tyrannosaurus-turtle.ts.net
         description: "Notifications"
         icon: ntfy.png
+        siteMonitor: https://ntfy.tyrannosaurus-turtle.ts.net
+        widget:
+            type: ntfy
+            url: http://ntfy-svc.ntfy.svc.cluster.local
+            topic: flux-alerts
+    - longhorn:
+        href: https://longhorn.tyrannosaurus-turtle.ts.net
+        description: "Block storage"
+        icon: longhorn.png
+        siteMonitor: https://longhorn.tyrannosaurus-turtle.ts.net
+    - hermes:
+        href: https://hermes.tyrannosaurus-turtle.ts.net
+        description: "AI agent"
+        icon: hermes.png
+        siteMonitor: https://hermes.tyrannosaurus-turtle.ts.net

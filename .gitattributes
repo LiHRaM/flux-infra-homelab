@@ -1,0 +1,13 @@
+# Normalize line endings to LF in the repository.
+#
+# The cluster is Talos/Linux and every manifest is consumed by kustomize there.
+# On Windows, core.autocrlf=true rewrites working-tree files to CRLF, which
+# makes `flux diff` report phantom drift on every touched file (the rendered
+# ConfigMap differs from the committed blob by line endings only).
+#
+# Pinning eol=lf keeps the working tree and the committed blob byte-identical
+# across platforms, so `flux diff` shows real drift only.
+* text=auto eol=lf
+
+# These are generated/encrypted by sops and must stay byte-exact.
+*.yaml text eol=lf

@@ -29,6 +29,49 @@ spec:
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: homepage.tyrannosaurus-turtle.ts.net
+            # Widget credentials. Homepage substitutes {{HOMEPAGE_VAR_*}} in
+            # services.yaml from these (src/utils/config/config.js), so the
+            # keys never land in the ConfigMap.
+            - name: HOMEPAGE_VAR_JELLYFIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: JELLYFIN_API_KEY
+            - name: HOMEPAGE_VAR_BAZARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: BAZARR_API_KEY
+            - name: HOMEPAGE_VAR_SONARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: SONARR_API_KEY
+            - name: HOMEPAGE_VAR_RADARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: RADARR_API_KEY
+            - name: HOMEPAGE_VAR_PROWLARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: PROWLARR_API_KEY
+            - name: HOMEPAGE_VAR_LIDARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: LIDARR_API_KEY
+            - name: HOMEPAGE_VAR_QBITTORRENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: QBITTORRENT_PASSWORD
+            - name: HOMEPAGE_VAR_HOMEASSISTANT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-widgets
+                  key: HOMEASSISTANT_TOKEN
           resources:
             requests:
               cpu: 200m
