@@ -22,7 +22,7 @@
         href: https://sonarr.tyrannosaurus-turtle.ts.net
         description: "Manage series"
         icon: sonarr.png
-        siteMonitor: http://sonarr.arrs.svc.cluster.local:8989
+        siteMonitor: http://sonarr.arrs.svc.cluster.local:8989/ping
         widget:
             type: sonarr
             url: http://sonarr.arrs.svc.cluster.local:8989
@@ -31,7 +31,7 @@
         href: https://radarr.tyrannosaurus-turtle.ts.net
         description: "Manage movies"
         icon: radarr.png
-        siteMonitor: http://radarr.arrs.svc.cluster.local:7878
+        siteMonitor: http://radarr.arrs.svc.cluster.local:7878/ping
         widget:
             type: radarr
             url: http://radarr.arrs.svc.cluster.local:7878
@@ -40,7 +40,7 @@
         href: https://prowlarr.tyrannosaurus-turtle.ts.net
         description: "Manage indexers"
         icon: prowlarr.png
-        siteMonitor: http://prowlarr.arrs.svc.cluster.local:9696
+        siteMonitor: http://prowlarr.arrs.svc.cluster.local:9696/ping
         widget:
             type: prowlarr
             url: http://prowlarr.arrs.svc.cluster.local:9696
@@ -49,7 +49,7 @@
         href: https://lidarr.tyrannosaurus-turtle.ts.net
         description: "Manage music"
         icon: lidarr.png
-        siteMonitor: http://lidarr.arrs.svc.cluster.local:8686
+        siteMonitor: http://lidarr.arrs.svc.cluster.local:8686/ping
         widget:
             type: lidarr
             url: http://lidarr.arrs.svc.cluster.local:8686
