@@ -5,6 +5,15 @@ metadata:
   namespace: saga
   labels:
     hilmargustafs.com/group: internal
+  annotations:
+    # Apply the shared ProxyClass to this ingress. It gives the operator's
+    # L7 proxy a real CPU request instead of the 1m it defaults to, which
+    # becomes cgroup cpu.weight=1 -- the lowest share on the node, for a pod
+    # that terminates TLS and runs a whole TCP stack in userspace
+    # (TS_USERSPACE=true). See apps/talos/jellyfin/proxyclass.yaml for the
+    # measurements, including the upstream GSO workaround that was tested
+    # here and rejected on evidence.
+    tailscale.com/proxy-class: internal-ingress
 spec:
   defaultBackend:
     service:

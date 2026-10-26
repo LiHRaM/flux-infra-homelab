@@ -1,0 +1,71 @@
+---
+# ProxyClass for the Tailscale operator's L7 ingress proxies.
+#
+# WHY THIS EXISTS
+#
+# The operator's L7 proxy is the only hop between a tailnet client and the
+# service it wants. Measured 2026-10-26 on the jellyfin ingress, the proxy
+# is where throughput collapses:
+#
+#   pod -> jellyfin ClusterIP                    87-455 MB/s  (server is fine)
+#   pod -> proxy tailnet IP (L7 proxy in path)   2.5-3.4 MB/s (~30x slower)
+#
+# Same-node and cross-node to the proxy are equally slow, so it is not the
+# inter-node hop and not the tailnet transport: it is the proxy itself.
+# The proxy's own fetch from the backend is fast (822 MB in 7 s), so the
+# loss is in the direction that faces the tailnet.
+#
+# WHY THE CPU REQUEST MATTERS
+#
+# The operator creates these proxy pods with requests of cpu=1m, memory=1Mi,
+# which the kernel turns into cgroup cpu.weight=1 -- the LOWEST possible
+# share, i.e. the proxy loses every CPU scheduling round against every
+# other pod on the node. On mimisbrunnr, which also hosts the Hermes agent,
+# the flux controllers and every other tailscale proxy, that is the worst
+# possible position for the one pod on the critical path.
+#
+# Raising it to 200m takes cpu.weight from 1 to 8 and gives the proxy a
+# normal share. The proxy's tailscaled runs with TS_USERSPACE=true, so TLS
+# termination and the whole TCP stack execute in userspace inside that pod:
+# it is a real CPU consumer, and weight 1 is not a defensible request for it.
+#
+# WHY TS_DEBUG_DISABLE_UDP_GSO IS NOT SET HERE
+#
+# It is the documented upstream mitigation for exactly this symptom
+# (tailscale/tailscale#20026 and #20858: bulk transfers collapse while the
+# backend stays fast, because send-side UDP GSO does not survive the nested
+# pod-veth -> Flannel VXLAN -> node-tailscale0 tunnel).
+#
+# It was applied live and A/B tested on this cluster, 40 MB ranged pulls
+# through the tailnet hostname from the same client, back to back:
+#
+#   GSO off : 10.9, 11.5, 10.3 MB/s
+#   GSO on  :  7.7,  6.0,  7.3 MB/s
+#
+# It is measurably SLOWER here, and the upstream failure mode (~15 KB/s) was
+# never observed on this cluster, so the GSO bug is not the active cause.
+# Shipping a knob that costs 30 % of throughput to fix a bug we do not have
+# is not defensible, so it is deliberately left off. The upstream issues are
+# cited here so the next person does not have to re-derive the experiment.
+#
+# WHAT ACTUALLY FIXES IT
+#
+# Stop putting the LAN clients through the operator's userspace L7 proxy.
+# The tailnet transport itself is healthy -- tailscale ping from the proxy
+# to the iPad is direct over the LAN address 192.168.1.111:41641 in 5-25 ms,
+# not DERP -- and a NodePort that bypasses the proxy measured 27 MB/s versus
+# 10 MB/s through the proxy on the same client and the same bytes. That is a
+# separate change with its own trade-offs (see the flux-infra-homelab skill,
+# references/jellyfin-client-performance-triage.md, fix order step 1).
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: internal-ingress
+spec:
+  statefulSet:
+    pod:
+      tailscaleContainer:
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi

@@ -6,6 +6,7 @@ resources:
 - config-pv-pvc.yaml
 - jellyfin-ingress.yaml
 - pvc-media.yaml
+- proxyclass.yaml
 - ../../base/jellyfin
 - ../../configMaps/linuxserver
 - ../../configMaps/jellyfin
