@@ -50,10 +50,9 @@ spec:
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              cpu: 200m
-              memory: 1Gi
+              cpu: 500m
+              memory: 2Gi
             limits:
-              cpu: 2000m
               # Sized from measurement, not guesswork. With VAAPI transcoding
               # (see apps/configMaps/jellyfin) the pod's worst observed working
               # set from synthetic load is ~1.2 GiB: 5 concurrent h264_vaapi
@@ -69,13 +68,36 @@ spec:
               # reclaimed page cache rather than killing the pod) but it cost real
               # churn: pgscan/pgsteal ~1.24M, workingset_refault_file ~126k.
               #
-              # 3 GiB clears that nightly peak while still sitting ~2.6 GiB below
-              # the 5 GiB this pod needed before VAAPI transcoding (its lifetime
-              # high-water mark was 2.96 GiB while software encoding with libx264).
-              # Note only the 1Gi request is actually withheld from the scheduler;
-              # this limit is a ceiling, so the extra GiB costs the node nothing
-              # until it is genuinely needed.
-              memory: 3Gi
+              # At 3 GiB the ceiling was still being hit, and by the wrong
+              # component. Measured live from inside the pod:
+              #   memory.current 3215032320 / memory.max 3221225472  (99.8 %)
+              #   memory.events: max 4, oom 0, oom_kill 0
+              #   memory.stat: file 2343849984, anon 683069440, shmem 193896448
+              #   pgscan 41826984 / pgsteal 41811981
+              # So 2.34 GB of the 3 GiB was NFS page cache for the media mount
+              # and only 683 MB was Jellyfin's own heap -- the cgroup was pinned
+              # at its ceiling by reclaimable cache, and the kernel was
+              # thrashing it (41.8M page scans against 41.8M steals, i.e. it
+              # scanned and immediately discarded, a pure loss) while the app
+              # read the same file repeatedly. Nothing was OOM-killed, so the
+              # pod stayed "Running" the whole time.
+              #
+              # 6 GiB gives the cache room to be a cache instead of a thrash
+              # target, and clears the nightly-maintenance peak with margin.
+              # Only the 2Gi request is withheld from the scheduler; the limit
+              # is a ceiling, so the extra GiB costs the node nothing until it
+              # is genuinely needed.
+              memory: 6Gi
+              # CPU 2 -> 4. The node has 4 cores and the pod was throttled for
+              # 804 s of its 21,167 s of CPU time (nr_throttled 37045 of 826694
+              # periods). The dominant cause was not viewers but three
+              # concurrent WHOLE-FILE transcodes of a 19h45m audiobook
+              # (2026-10-26 01:31-01:35, FFmpeg.Transcode logs, -threads 0 =>
+              # every core, ~860 MB read each). Those saturate the limit and
+              # starve Jellyfin's request thread pool, which is what a client
+              # experiences as a freeze. 4 lets the transcode pool make
+              # progress without starving the request path.
+              cpu: 4000m
           ports:
             - containerPort: 8096
               protocol: TCP

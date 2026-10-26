@@ -15,6 +15,29 @@ spec:
           - matchExpressions:
             - key: node-role.kubernetes.io/control-plane
               operator: DoesNotExist
+      # Pin to a known node so a reschedule cannot silently move the pod.
+      #
+      # The anti-affinity above only excludes control-plane nodes, so this pod
+      # can land on any of the three workers. The three workers are NOT
+      # interchangeable for this workload:
+      #   talos-ora-f57   0300-0412  -- chosen
+      #   mimisbrunnr     0300-5917  -- 7768m of 7950m CPU already REQUESTED
+      #   talos-6on-af9   0300-041e
+      # mimisbrunnr is at 97 % of its allocatable CPU committed by requests, so
+      # scheduling a 4-CPU / 6 GiB transcoding pod there is fragile: a single
+      # other pod's request bump can make the node unschedulable and the
+      # jellyfin pod bounces. It also hosts all the tailscale L7 proxies
+      # (see apps/talos/jellyfin/jellyfin-ingress.yaml), so the ingress path
+      # and the media server would compete for the same node.
+      #
+      # Pinning also makes the iGPU deterministic. Each worker has a
+      # different Intel iGPU, and the h264_vaapi encoder is not equally
+      # capable across them, so a silent reschedule can change the encoder
+      # Jellyfin uses. Verified 2026-10-26: h264_vaapi encodes fine on
+      # talos-ora-f57 (0300-0412) and on mimisbrunnr (0300-5917), so both work
+      # today -- the pin is about predictability, not about a known-broken GPU.
+      nodeSelector:
+        kubernetes.io/hostname: talos-ora-f57
       containers:
       - name: jellyfin
         resources:
