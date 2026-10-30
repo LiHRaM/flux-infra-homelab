@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/json-patch.json
+# Matter is not routable from the pod network: commissioning and control run on
+# mDNS multicast (224.0.0.251) and IPv6 (including link-local) to the Thread
+# prefix. flannel here is IPv4-only (the pod has fe80 only) so the controller has
+# to share the node's netns and take the node's LAN address.
+- op: add
+  path: /spec/template/spec/hostNetwork
+  value: true
+# With hostNetwork the pod would otherwise inherit the node's resolv.conf (Talos
+# stub resolver at 127.0.0.53) and lose cluster DNS.
+- op: add
+  path: /spec/template/spec/dnsPolicy
+  value: ClusterFirstWithHostNet
+# Pinned to the only node verified to have everything Matter needs:
+#   - LAN NIC 192.168.1.113 (USB ethernet, DHCP-reserved on the gateway)
+#   - working IPv6 to the Thread border router: ping6 to
+#     fd6a:f830:4e42:0:3d85:8a13:222f:16db (Nest Hub TBR) answered 0% loss
+#   - mDNS reaching the LAN: 622-byte _meshcop._udp reply from 192.168.1.114
+# Re-verify those three before moving this selector to another node.
+- op: add
+  path: /spec/template/spec/nodeSelector
+  value:
+    kubernetes.io/hostname: mimisbrunnr

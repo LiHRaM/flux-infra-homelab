@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: matterserver-data
+  namespace: matter
+spec:
+  storageClassName: longhorn-trusty
+  resources:
+    requests:
+      # Fabric credentials + node data are tiny; the headroom is for imported
+      # OTA image files. Losing this volume means re-commissioning every device,
+      # so it must stay in the backup scope.
+      storage: 2Gi
+  accessModes:
+    - ReadWriteOnce

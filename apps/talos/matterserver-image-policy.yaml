@@ -1,0 +1,15 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: matterserver
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: matterserver
+  policy:
+    # Patch-level only on purpose. The server advertises a WS schema version and a
+    # minimum supported client schema; HA 2026.10.4 ships matter-python-client 1.4.0
+    # (client SCHEMA_VERSION 11), so a minor bump could raise the floor and lock HA
+    # out. Bump the minor by hand after checking server_info.min_supported_schema_version.
+    semver:
+      range: '>=1.5.5 <1.6.0'

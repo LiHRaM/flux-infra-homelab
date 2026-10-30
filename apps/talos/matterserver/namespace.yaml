@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: matter
+  labels:
+    # Matter's controller must share the node's network namespace (mDNS
+    # multicast + IPv6 to the Thread prefix), and PodSecurity "baseline"
+    # rejects host namespaces — same reason qbittorrent/tailscale/longhorn
+    # are privileged. Keep HA itself in `smarthome` (baseline) rather than
+    # relaxing that namespace.
+    pod-security.kubernetes.io/enforce: "privileged"

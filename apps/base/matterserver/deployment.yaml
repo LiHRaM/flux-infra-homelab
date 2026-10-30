@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matterserver
+  labels:
+    app: matterserver
+spec:
+  # Single replica, RWO fabric data, and a fixed port on the node's netns:
+  # rolling updates would briefly run two servers on the same host port.
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matterserver
+  template:
+    metadata:
+      labels:
+        app: matterserver
+    spec:
+      containers:
+        - name: matterserver
+          image: ghcr.io/matter-js/matterjs-server:1.5.5 # {"$imagepolicy": "flux-system:matterserver"}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: Europe/Copenhagen
+            - name: LOG_LEVEL
+              value: info
+            # No default heap hint upstream; size for a few dozen commissioned nodes.
+            - name: NODE_OPTIONS
+              value: --max-old-space-size=384
+          ports:
+            - containerPort: 5580
+              name: ws
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          securityContext:
+            # The image runs the server as unprivileged 1000:1000 by design.
+            runAsUser: 1000
+            runAsGroup: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              # The image ships ping with cap_net_raw for matter's node-ping
+              # diagnostic; without it that dashboard action fails.
+              add: ["NET_RAW"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: ws
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: ws
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 5
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /tmp
+              name: tmp
+      securityContext:
+        # Longhorn hands the volume over root-owned; the server needs it writable as 1000.
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: matterserver-data
+        - name: tmp
+          emptyDir: {}
